@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Panth\XmlSitemap\Controller\Adminhtml\Profile;
 
-use Panth\AdvancedSEO\Controller\Adminhtml\AbstractAction;
+use Panth\XmlSitemap\Controller\Adminhtml\AbstractAction;
 use Magento\Backend\Model\View\Result\ForwardFactory;
 use Magento\Backend\App\Action\Context;
 

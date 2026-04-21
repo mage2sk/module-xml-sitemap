@@ -4,6 +4,20 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] — 2026-04-21
+
+### Fixed
+
+- Admin controllers under `Controller/Adminhtml/Profile/` referenced the
+  pre-extraction `Panth\AdvancedSEO\Controller\Adminhtml\AbstractAction`
+  which no longer exists — admin CRUD pages failed to generate
+  interceptors during `setup:di:compile`. Each controller now extends
+  the module-local `Panth\XmlSitemap\Controller\Adminhtml\AbstractAction`.
+- `Controller\Adminhtml\Profile\Rebuild` imported the renamed cron
+  class under its old name `Panth\XmlSitemap\Cron\SitemapRebuild`;
+  updated to `Panth\XmlSitemap\Cron\Rebuild` (aliased as `RebuildCron`
+  to avoid the local class-name collision).
+
 ## [1.0.0] — 2026-04-21
 
 ### Added
