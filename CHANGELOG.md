@@ -4,6 +4,25 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] — 2026-04-21
+
+### Fixed
+
+- **`ProductImageSource` source model missing.** The 1.0.1 release left
+  `system.xml` field `product_image_source` pointing at
+  `Panth\XmlSitemap\Model\Config\Source\ProductImageSource` which was
+  never ported from `Panth_AdvancedSEO`. The admin System Configuration
+  page for `panth_xml_sitemap` threw
+  `ReflectionException: Class "Panth\XmlSitemap\Model\Config\Source\ProductImageSource" does not exist`
+  on render. Added the class with 3 options (base_image / small_image /
+  thumbnail).
+- **Empty Store View column on the Profile grid.** Magento's base
+  `Magento\Store\Ui\Component\Listing\Column\Store` renders nothing for
+  integer `store_id = 0` (All Store Views) because its emptiness check
+  trips on 0. Introduced `Panth\XmlSitemap\Ui\Component\Listing\Column\Store`
+  that normalises `store_id` to a single-element array before delegating
+  to the parent renderer — same pattern Panth_Crosslinks uses.
+
 ## [1.0.1] — 2026-04-21
 
 ### Fixed
