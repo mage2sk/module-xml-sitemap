@@ -17,7 +17,7 @@ use Psr\Log\LoggerInterface;
  * Streaming sitemap builder. Iterates contributors, writes shards at
  * shard_size boundary, emits sitemap_index.xml. Never buffers full lists.
  *
- * Output directory: pub/sitemap/panth/<store_code>/
+ * Output directory: pub/sitemap/<store_code>/
  *
  * When `panth_xml_sitemap/generation/xsl_enabled` is active, writes a human-readable XSL
  * stylesheet next to the shard files and references it via an
@@ -64,7 +64,7 @@ class Builder implements BuilderInterface
         $baseUrl   = rtrim((string) $store->getBaseUrl(), '/');
 
         $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
-        $relDir = 'sitemap/panth/' . $storeCode;
+        $relDir = 'sitemap/' . $storeCode;
         $pub->create($relDir);
         $absDir = $pub->getAbsolutePath($relDir);
 
@@ -120,7 +120,7 @@ class Builder implements BuilderInterface
             $files[] = $path;
             $filename = basename($path);
             $shards[] = [
-                'loc'     => $baseUrl . '/sitemap/panth/' . $storeCode . '/' . $filename,
+                'loc'     => $baseUrl . '/sitemap/' . $storeCode . '/' . $filename,
                 'lastmod' => $now,
             ];
             $shard = null;
@@ -165,7 +165,7 @@ class Builder implements BuilderInterface
                 $sitemapUrl = $shards[0]['loc'] ?? '';
                 if (count($shards) > 1) {
                     // Use the sitemap index URL when multiple shards exist
-                    $sitemapUrl = $baseUrl . '/sitemap/panth/' . $storeCode . '/sitemap_index.xml';
+                    $sitemapUrl = $baseUrl . '/sitemap/' . $storeCode . '/sitemap_index.xml';
                 }
                 $this->pingSearchEngines($storeId, $sitemapUrl);
             }
@@ -197,6 +197,34 @@ class Builder implements BuilderInterface
 
         $xslEnabled = $this->config->isSitemapXslEnabled($storeId);
 
+        // Load the active profile for this store (store-specific first, then
+        // the "All Stores" profile) so the live `/panth-sitemap.xml` endpoint
+        // respects the same entity_types / flags / custom_links the CLI
+        // generator uses.
+        $profile       = $this->loadActiveProfileForStore($storeId);
+        $allowedBuckets = $this->resolveEntityBuckets(
+            (string) ($profile['entity_types'] ?? '')
+        );
+        $contributorBucketMap = [
+            'product'      => 'product',
+            'category'     => 'category',
+            'cms_page'     => 'cms',
+            'landing_page' => 'product',
+            'blog'         => 'cms',
+        ];
+        $profileConfig = $profile ? [
+            'exclude_out_of_stock'   => (bool) ($profile['exclude_out_of_stock'] ?? false),
+            'exclude_noindex'        => (bool) ($profile['exclude_noindex'] ?? false),
+            'include_images'         => (bool) ($profile['include_images'] ?? true),
+            'include_hreflang_tags'  => (bool) ($profile['include_hreflang_tags'] ?? true),
+            'include_video_sitemap'  => (bool) ($profile['include_video_sitemap'] ?? true),
+            'priority_homepage'      => isset($profile['priority_homepage'])
+                ? (float) $profile['priority_homepage']
+                : null,
+        ] : [];
+        $includeHreflang = (bool) ($profileConfig['include_hreflang_tags'] ?? true);
+        $includeVideo    = (bool) ($profileConfig['include_video_sitemap'] ?? true);
+
         $xml = new \XMLWriter();
         $xml->openMemory();
         $xml->setIndent(true);
@@ -207,7 +235,7 @@ class Builder implements BuilderInterface
             $xml->writePi(
                 'xml-stylesheet',
                 'type="text/xsl" href="' . htmlspecialchars(
-                    $baseUrl . '/sitemap/panth/' . $store->getCode() . '/' . self::XSL_FILENAME,
+                    $baseUrl . '/sitemap/' . $store->getCode() . '/' . self::XSL_FILENAME,
                     ENT_XML1 | ENT_QUOTES,
                     'UTF-8'
                 ) . '"'
@@ -217,20 +245,41 @@ class Builder implements BuilderInterface
         $xml->startElement('urlset');
         $xml->writeAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $xml->writeAttribute('xmlns:image', 'http://www.google.com/schemas/sitemap-image/1.1');
-        $xml->writeAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
-        $xml->writeAttribute('xmlns:video', 'http://www.google.com/schemas/sitemap-video/1.1');
+        if ($includeHreflang) {
+            $xml->writeAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
+        }
+        if ($includeVideo) {
+            $xml->writeAttribute('xmlns:video', 'http://www.google.com/schemas/sitemap-video/1.1');
+        }
+
+        $seenLocs = [];
 
         foreach ($this->contributors as $contributor) {
             if (!$contributor instanceof ContributorInterface) {
                 continue;
             }
+
+            if ($allowedBuckets !== null) {
+                $bucket = $contributorBucketMap[$contributor->getCode()] ?? null;
+                if ($bucket !== null && !isset($allowedBuckets[$bucket])) {
+                    continue;
+                }
+            }
+
             try {
-                foreach ($contributor->getUrls($storeId) as $url) {
+                foreach ($contributor->getUrls($storeId, $profileConfig) as $url) {
                     if (!is_array($url) || empty($url['loc'])) {
                         continue;
                     }
+                    $loc = (string) $url['loc'];
+                    // Dedup across contributors so CMS + LandingPage + Blog
+                    // can't emit the same URL twice.
+                    if (isset($seenLocs[$loc])) {
+                        continue;
+                    }
+                    $seenLocs[$loc] = true;
                     $xml->startElement('url');
-                    $xml->writeElement('loc', (string) $url['loc']);
+                    $xml->writeElement('loc', $loc);
                     if (!empty($url['lastmod'])) {
                         $xml->writeElement('lastmod', (string) $url['lastmod']);
                     }
@@ -296,10 +345,67 @@ class Builder implements BuilderInterface
             }
         }
 
+        // Emit profile-configured custom_links + additional_links system-config
+        // after contributor URLs so `/panth-sitemap.xml` matches what the CLI
+        // writes when 'custom' is selected in entity_types.
+        if ($allowedBuckets === null || isset($allowedBuckets['custom'])) {
+            $customLinks = $profile ? $this->resolveCustomLinks($profile, $baseUrl) : [];
+            foreach ($customLinks as $link) {
+                $loc = (string) ($link['loc'] ?? '');
+                if ($loc === '' || isset($seenLocs[$loc])) {
+                    continue;
+                }
+                $seenLocs[$loc] = true;
+                $xml->startElement('url');
+                $xml->writeElement('loc', $loc);
+                if (!empty($link['changefreq'])) {
+                    $xml->writeElement('changefreq', (string) $link['changefreq']);
+                }
+                if (isset($link['priority'])) {
+                    $xml->writeElement('priority', number_format((float) $link['priority'], 1, '.', ''));
+                }
+                $xml->endElement();
+            }
+        }
+
         $xml->endElement(); // urlset
         $xml->endDocument();
 
         return $xml->outputMemory();
+    }
+
+    /**
+     * Load the active sitemap profile for a given store. Prefers a profile
+     * whose `store_id` matches exactly, falls back to the "All Stores"
+     * profile (`store_id = 0`). Returns null when neither exists.
+     *
+     * Used by `buildForStore` so the live `/panth-sitemap.xml` endpoint
+     * honours the same entity_types / flags / custom_links the CLI
+     * generator applies from `buildFromProfile`.
+     *
+     * @return array<string,mixed>|null
+     */
+    private function loadActiveProfileForStore(int $storeId): ?array
+    {
+        try {
+            $conn  = $this->resourceConnection->getConnection();
+            $table = $this->resourceConnection->getTableName('panth_seo_sitemap_profile');
+            if (!$conn->isTableExists($table)) {
+                return null;
+            }
+
+            $select = $conn->select()
+                ->from($table)
+                ->where('is_active = ?', 1)
+                ->where('store_id IN (?)', [$storeId, 0])
+                ->order(new \Zend_Db_Expr('store_id = ' . $storeId . ' DESC'))
+                ->limit(1);
+
+            $row = $conn->fetchRow($select);
+            return is_array($row) && !empty($row) ? $row : null;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
@@ -344,16 +450,15 @@ class Builder implements BuilderInterface
         $entitySettings = $this->resolveEntitySettings($profile);
 
         // Output path honours the profile's `output_path` template with the
-        // `{store_code}` placeholder. Falls back to `sitemap/panth/<code>/profile-N/`
-        // when the column is empty so unmigrated profiles keep working.
+        // `{store_code}` placeholder. Default keeps the path short —
+        // `sitemap/<store_code>/` — so `sitemap_index.xml` lands one folder
+        // deep. Multi-store installs still avoid collisions via the store
+        // subdirectory.
         $outputPath = trim((string) ($profile['output_path'] ?? ''));
         if ($outputPath !== '') {
             $profileDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
         } else {
-            $profileDir = 'sitemap/panth/' . $storeCode;
-            if (!empty($profile['profile_id'])) {
-                $profileDir .= '/profile-' . (int) $profile['profile_id'];
-            }
+            $profileDir = 'sitemap/' . $storeCode;
         }
         $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
         $pub->create($profileDir);

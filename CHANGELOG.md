@@ -4,6 +4,39 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.6] — 2026-04-21
+
+### Changed
+
+- **Shorter default output path** — `sitemap/<store_code>/` instead of
+  `sitemap/panth/<store_code>/profile-N/`. The index file now lives one
+  folder deep at `/sitemap/<store_code>/sitemap_index.xml`. Existing
+  profiles with a non-empty `output_path` column keep using their
+  configured path. `AddDefaultProfile` no longer seeds an `output_path`
+  value so new installs pick up the short default automatically.
+
+### Fixed
+
+- **`/panth-sitemap.xml` ignored the profile's `entity_types` filter.**
+  The live endpoint's `buildForStore()` iterated every contributor
+  unconditionally, so selecting only "Products" in the admin multiselect
+  still produced CMS + landing-page + blog URLs on the frontend. The
+  method now loads the store's active profile (store-specific first,
+  then "All Stores" fallback) and:
+  - skips contributors outside the profile's allowed buckets
+    (product / category / cms / custom, with landing-page+blog mapped
+    into product/cms respectively);
+  - emits profile-configured `custom_links` when `custom` is selected;
+  - passes `priority_homepage`, `exclude_out_of_stock`, `exclude_noindex`,
+    `include_images`, `include_hreflang_tags`, `include_video_sitemap`
+    through as the contributor `$config` array;
+  - deduplicates URLs across contributors so `CmsPageContributor` +
+    `LandingPageContributor` + `BlogContributor` can't emit the same
+    URL twice.
+- **XSL stylesheet path in `buildForStore()`** pointed at
+  `/sitemap/panth/<code>/sitemap-style.xsl`. Updated to match the new
+  short output path.
+
 ## [1.0.5] — 2026-04-21
 
 ### Added

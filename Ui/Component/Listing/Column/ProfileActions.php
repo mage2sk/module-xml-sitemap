@@ -93,7 +93,7 @@ class ProfileActions extends Column
             if ($outputPath !== '') {
                 $relDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
             } else {
-                $relDir = 'sitemap/panth/' . $storeCode . '/profile-' . $profileId;
+                $relDir = 'sitemap/' . $storeCode;
             }
 
             return $baseUrl . '/' . ltrim($relDir, '/') . '/sitemap_index.xml';

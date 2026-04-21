@@ -72,7 +72,7 @@ class ViewSitemapButton implements ButtonProviderInterface
             if ($outputPath !== '') {
                 $relDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
             } else {
-                $relDir = 'sitemap/panth/' . $storeCode . '/profile-' . (int) ($profile['profile_id'] ?? 0);
+                $relDir = 'sitemap/' . $storeCode;
             }
 
             return $baseUrl . '/' . ltrim($relDir, '/') . '/sitemap_index.xml';

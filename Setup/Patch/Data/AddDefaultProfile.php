@@ -63,7 +63,7 @@ class AddDefaultProfile implements DataPatchInterface
             'exclude_out_of_stock' => 0,
             'exclude_noindex'     => 1,
             'custom_links'        => '',
-            'output_path'         => 'sitemap/panth/{store_code}/',
+            'output_path'         => '',
             'url_count'           => 0,
             'file_count'          => 0,
             'is_active'           => 1,
