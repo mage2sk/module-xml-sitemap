@@ -40,13 +40,17 @@ class ProductContributor implements ContributorInterface
         $store   = $this->storeManager->getStore($storeId);
         $baseUrl = rtrim((string) $store->getBaseUrl(), '/') . '/';
 
-        // Yield homepage entry first when optimisation is enabled
+        // Yield homepage entry first when optimisation is enabled. Priority
+        // honours the profile's `priority_homepage` override when set.
         if ($this->config->isSitemapHomepageOptimization($storeId)) {
             $defaultChangefreq = $config['changefreq'] ?? 'daily';
+            $homepagePriority  = isset($config['priority_homepage'])
+                ? (float) $config['priority_homepage']
+                : 1.0;
             yield [
                 'loc'        => rtrim($baseUrl, '/') . '/',
                 'changefreq' => $defaultChangefreq,
-                'priority'   => 1.0,
+                'priority'   => $homepagePriority,
             ];
         }
 
@@ -156,7 +160,9 @@ class ProductContributor implements ContributorInterface
                 // Homepage optimisation: boost priority/changefreq for root or "home" path
                 if ($this->config->isSitemapHomepageOptimization($storeId) && $this->isHomepage($path)) {
                     $entry['changefreq'] = 'daily';
-                    $entry['priority']   = 1.0;
+                    $entry['priority']   = isset($config['priority_homepage'])
+                        ? (float) $config['priority_homepage']
+                        : 1.0;
                 }
 
                 // Attach image data when available

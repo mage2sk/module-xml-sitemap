@@ -15,10 +15,14 @@ class ShardWriter
     private string $path;
 
     /**
-     * @param string      $path    Absolute file path for the shard XML.
-     * @param string|null $xslHref Optional relative href for an xml-stylesheet processing instruction.
+     * @param string              $path    Absolute file path for the shard XML.
+     * @param string|null         $xslHref Optional relative href for an xml-stylesheet processing instruction.
+     * @param array<string,mixed> $options Optional namespace toggles:
+     *                                     - include_hreflang (bool) → emit xmlns:xhtml
+     *                                     - include_video    (bool) → emit xmlns:video
+     *                                     Defaults to emitting both for back-compat.
      */
-    public function open(string $path, ?string $xslHref = null): void
+    public function open(string $path, ?string $xslHref = null, array $options = []): void
     {
         $this->path = $path;
         $dir = dirname($path);
@@ -37,11 +41,17 @@ class ShardWriter
                 'type="text/xsl" href="' . htmlspecialchars($xslHref, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"'
             );
         }
+        $includeHreflang = (bool) ($options['include_hreflang'] ?? true);
+        $includeVideo    = (bool) ($options['include_video'] ?? true);
         $this->writer->startElement('urlset');
         $this->writer->writeAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $this->writer->writeAttribute('xmlns:image', 'http://www.google.com/schemas/sitemap-image/1.1');
-        $this->writer->writeAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
-        $this->writer->writeAttribute('xmlns:video', 'http://www.google.com/schemas/sitemap-video/1.1');
+        if ($includeHreflang) {
+            $this->writer->writeAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
+        }
+        if ($includeVideo) {
+            $this->writer->writeAttribute('xmlns:video', 'http://www.google.com/schemas/sitemap-video/1.1');
+        }
         $this->open = true;
         $this->count = 0;
     }

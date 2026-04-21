@@ -4,6 +4,38 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.4] — 2026-04-21
+
+### Fixed
+
+- **Profile `entity_types` multiselect was dead.** Builder iterated every
+  contributor regardless of the profile's selection, so turning off
+  Products/Categories/CMS/Custom Links in the admin had no effect on
+  the generated sitemap. `buildFromProfile()` now parses the CSV value
+  into a bucket set (product / category / cms / custom) and skips any
+  contributor outside the allowed buckets. Custom-link shard generation
+  is gated on the `custom` bucket being selected.
+- **Profile `priority_homepage` was ignored.** `ProductContributor`
+  hardcoded `1.0` in both the dedicated homepage-yield branch and the
+  url_rewrite loop's homepage-optimisation override. Both branches now
+  read `$config['priority_homepage']` with a `1.0` fallback.
+- **Profile `custom_links` CSV format was not parsed.** The newline
+  branch of `resolveCustomLinks()` treated every line as a bare URL so
+  `https://example.com/page,weekly,0.7` ended up as a `<loc>` containing
+  commas. Parser now splits on the first two commas and extracts
+  `url,changefreq,priority`.
+- **Profile `output_path` template was not applied.** `buildFromProfile()`
+  hardcoded `sitemap/panth/{store_code}/profile-N/`. The column now
+  honours its `{store_code}` placeholder; pre-existing profiles with an
+  empty value keep the legacy default for backward compatibility.
+- **Profile `include_hreflang_tags` / `include_video_sitemap` were
+  unused.** `ShardWriter` unconditionally emitted `xmlns:xhtml` and
+  `xmlns:video` on every urlset. The writer's `open()` now accepts an
+  options array and the two flags are plumbed through `buildFromProfile`
+  → `writeEntityShards` → `ShardWriter::open`. Custom-link shards always
+  opt out of both auxiliary namespaces since their URLs never carry
+  hreflang or video data.
+
 ## [1.0.3] — 2026-04-21
 
 ### Fixed

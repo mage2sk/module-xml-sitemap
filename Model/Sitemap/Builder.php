@@ -325,21 +325,37 @@ class Builder implements BuilderInterface
             $maxUrlsPerFile = 50000;
         }
 
-        // Profile-level settings
+        // Profile-level settings. `include_hreflang_tags` / `include_video_sitemap`
+        // gate the xhtml/video xmlns declarations in the generated shards, and
+        // `priority_homepage` overrides the hard-coded 1.0 default in
+        // ProductContributor::homepage-optimisation branch.
         $profileConfig = [
-            'exclude_out_of_stock' => (bool) ($profile['exclude_out_of_stock'] ?? false),
-            'exclude_noindex'      => (bool) ($profile['exclude_noindex'] ?? false),
-            'include_images'       => (bool) ($profile['include_images'] ?? true),
+            'exclude_out_of_stock'   => (bool) ($profile['exclude_out_of_stock'] ?? false),
+            'exclude_noindex'        => (bool) ($profile['exclude_noindex'] ?? false),
+            'include_images'         => (bool) ($profile['include_images'] ?? true),
+            'include_hreflang_tags'  => (bool) ($profile['include_hreflang_tags'] ?? true),
+            'include_video_sitemap'  => (bool) ($profile['include_video_sitemap'] ?? true),
+            'priority_homepage'      => isset($profile['priority_homepage'])
+                ? (float) $profile['priority_homepage']
+                : null,
         ];
 
         // Per-entity changefreq/priority from profile (JSON-decoded or direct columns)
         $entitySettings = $this->resolveEntitySettings($profile);
 
-        $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
-        $profileDir = 'sitemap/panth/' . $storeCode;
-        if (!empty($profile['profile_id'])) {
-            $profileDir .= '/profile-' . (int) $profile['profile_id'];
+        // Output path honours the profile's `output_path` template with the
+        // `{store_code}` placeholder. Falls back to `sitemap/panth/<code>/profile-N/`
+        // when the column is empty so unmigrated profiles keep working.
+        $outputPath = trim((string) ($profile['output_path'] ?? ''));
+        if ($outputPath !== '') {
+            $profileDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
+        } else {
+            $profileDir = 'sitemap/panth/' . $storeCode;
+            if (!empty($profile['profile_id'])) {
+                $profileDir .= '/profile-' . (int) $profile['profile_id'];
+            }
         }
+        $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
         $pub->create($profileDir);
         $absDir = $pub->getAbsolutePath($profileDir);
 
@@ -384,6 +400,20 @@ class Builder implements BuilderInterface
             'cms_page' => 'cms_page',
         ];
 
+        // Profile-level entity-type filter. Empty = include everything (back-compat).
+        // Contributors not mapped into one of the four admin buckets
+        // (product / category / cms / custom) are treated as always-on
+        // decorators (hreflang, image, video additions run alongside their
+        // host entity) and skipped from this gating.
+        $allowedBuckets = $this->resolveEntityBuckets((string) ($profile['entity_types'] ?? ''));
+        $contributorBucketMap = [
+            'product'       => 'product',
+            'category'      => 'category',
+            'cms_page'      => 'cms',
+            'landing_page'  => 'product',
+            'blog'          => 'cms',
+        ];
+
         // Generate files per contributor (each entity type gets its own shard series)
         foreach ($this->contributors as $contributor) {
             if (!$contributor instanceof ContributorInterface) {
@@ -393,6 +423,13 @@ class Builder implements BuilderInterface
             $code       = $contributor->getCode();
             $entityType = $contributorEntityMap[$code] ?? $code;
             $prefix     = self::ENTITY_PREFIX_MAP[$entityType] ?? ('sitemap-' . $entityType);
+
+            if ($allowedBuckets !== null) {
+                $bucket = $contributorBucketMap[$code] ?? null;
+                if ($bucket !== null && !isset($allowedBuckets[$bucket])) {
+                    continue;
+                }
+            }
 
             // Build config for this contributor from profile
             $contributorConfig = $profileConfig;
@@ -424,8 +461,11 @@ class Builder implements BuilderInterface
             }
         }
 
-        // Handle custom links from profile
-        $customLinks = $this->resolveCustomLinks($profile, $baseUrl);
+        // Handle custom links from profile, gated on the profile's entity_types
+        // when the filter is set ('custom' must be one of the allowed buckets).
+        $customLinks = ($allowedBuckets === null || isset($allowedBuckets['custom']))
+            ? $this->resolveCustomLinks($profile, $baseUrl)
+            : [];
         if (!empty($customLinks)) {
             $result = $this->writeCustomLinkShards(
                 $customLinks,
@@ -490,11 +530,18 @@ class Builder implements BuilderInterface
         $shardUrlCount = 0;
         $shard    = null;
 
-        $openShard = function () use (&$shard, &$shardIdx, &$shardUrlCount, $absDir, $prefix, $xslHref): void {
+        // Propagate hreflang + video xmlns toggles from the profile config
+        // so the resulting shards only declare the namespaces they actually use.
+        $shardOptions = [
+            'include_hreflang' => (bool) ($config['include_hreflang_tags'] ?? true),
+            'include_video'    => (bool) ($config['include_video_sitemap'] ?? true),
+        ];
+
+        $openShard = function () use (&$shard, &$shardIdx, &$shardUrlCount, $absDir, $prefix, $xslHref, $shardOptions): void {
             $shardIdx++;
             $path = rtrim($absDir, '/') . '/' . $prefix . '-' . $shardIdx . '.xml';
             $shard = $this->shardFactory->create();
-            $shard->open($path, $xslHref);
+            $shard->open($path, $xslHref, $shardOptions);
             $shardUrlCount = 0;
         };
 
@@ -574,11 +621,15 @@ class Builder implements BuilderInterface
         $defaultChangefreq = $entitySettings['changefreq'] ?? 'weekly';
         $defaultPriority   = isset($entitySettings['priority']) ? (float) $entitySettings['priority'] : 0.5;
 
-        $openShard = function () use (&$shard, &$shardIdx, &$shardUrlCount, $absDir, $prefix, $xslHref): void {
+        // Custom links never carry image/hreflang/video extensions; skip the
+        // auxiliary xmlns declarations to keep the shard minimal.
+        $customShardOptions = ['include_hreflang' => false, 'include_video' => false];
+
+        $openShard = function () use (&$shard, &$shardIdx, &$shardUrlCount, $absDir, $prefix, $xslHref, $customShardOptions): void {
             $shardIdx++;
             $path = rtrim($absDir, '/') . '/' . $prefix . '-' . $shardIdx . '.xml';
             $shard = $this->shardFactory->create();
-            $shard->open($path, $xslHref);
+            $shard->open($path, $xslHref, $customShardOptions);
             $shardUrlCount = 0;
         };
 
@@ -696,6 +747,29 @@ class Builder implements BuilderInterface
      *
      * @return list<array{loc:string, changefreq?:string, priority?:float}>
      */
+    /**
+     * Parse the profile's `entity_types` multiselect value into a set of
+     * allowed admin buckets (product / category / cms / custom).
+     *
+     * Returns null when the filter is empty — meaning "include everything"
+     * (back-compat for profiles seeded before the filter landed). Otherwise
+     * returns a map where keys are the allowed buckets.
+     *
+     * @return array<string,true>|null
+     */
+    private function resolveEntityBuckets(string $entityTypes): ?array
+    {
+        $trimmed = trim($entityTypes);
+        if ($trimmed === '') {
+            return null;
+        }
+        $parts = array_filter(array_map('trim', explode(',', $trimmed)));
+        if (empty($parts)) {
+            return null;
+        }
+        return array_fill_keys($parts, true);
+    }
+
     private function resolveCustomLinks(array $profile, string $baseUrl): array
     {
         $raw = $profile['custom_links'] ?? '';
@@ -709,15 +783,34 @@ class Builder implements BuilderInterface
             if (is_array($decoded)) {
                 $raw = $decoded;
             } else {
-                // Treat as newline-separated URLs
+                // Newline-separated. Each line is either
+                //   https://example.com/path
+                // or a 2-3-column CSV
+                //   https://example.com/path,weekly,0.7
+                // (changefreq + priority are optional).
                 $lines = array_filter(array_map('trim', explode("\n", $raw)));
                 $links = [];
                 foreach ($lines as $line) {
                     if ($line === '') {
                         continue;
                     }
-                    $url = str_starts_with($line, 'http') ? $line : $baseUrl . '/' . ltrim($line, '/');
-                    $links[] = ['loc' => $url];
+                    [$loc, $changefreq, $priority] = array_pad(
+                        array_map('trim', explode(',', $line, 3)),
+                        3,
+                        null
+                    );
+                    if ($loc === null || $loc === '') {
+                        continue;
+                    }
+                    $url = str_starts_with($loc, 'http') ? $loc : $baseUrl . '/' . ltrim($loc, '/');
+                    $entry = ['loc' => $url];
+                    if ($changefreq !== null && $changefreq !== '') {
+                        $entry['changefreq'] = $changefreq;
+                    }
+                    if ($priority !== null && $priority !== '' && is_numeric($priority)) {
+                        $entry['priority'] = (float) $priority;
+                    }
+                    $links[] = $entry;
                 }
                 return $links;
             }
