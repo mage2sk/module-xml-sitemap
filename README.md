@@ -55,6 +55,7 @@ Magento's native XML sitemap is a single blob written to disk by a cron job that
 
 ## Table of Contents
 
+- [Preview](#preview)
 - [Features](#features)
 - [How It Works](#how-it-works)
 - [Compatibility](#compatibility)
@@ -67,6 +68,36 @@ Magento's native XML sitemap is a single blob written to disk by a cron job that
 - [Cron](#cron)
 - [Troubleshooting](#troubleshooting)
 - [Support](#support)
+
+---
+
+## Preview
+
+### Live walkthrough
+
+End-to-end admin flow — open the XML Sitemap config, toggle a few fields, edit the default profile, flip entity types and per-type priorities, run Generate Now, and click View Sitemap. Click to play.
+
+![Panth XML Sitemap demo](docs/images/demo.gif)
+
+### Admin
+
+**System configuration** — **Stores → Configuration → Panth Extensions → XML Sitemap**. Six collapsible groups (General, Generation, Hreflang, Images & Video, Search Engine Ping, Additional Links) cover every global default.
+
+![Admin configuration](docs/images/admin-config.png)
+
+**Sitemap Profiles grid** — one row per profile with columns for ID, Name, Store View (resolved from store_id), Entity Types (CSV of product/category/cms/custom), Active, URL Count, File Count, Last Generated, Cron flag, and per-row Edit / Generate Now / View Sitemap / Delete actions.
+
+![Admin grid](docs/images/admin-grid.png)
+
+**Edit Sitemap Profile form** — eight collapsible sections: General, Entity Types (multi-select), Product Settings, Category Settings, CMS Page Settings, Custom Links, Advanced Settings (max URLs per file, video + hreflang xmlns toggles, output path with `{store_code}`), Scheduling, and read-only Generation Status populated after each run.
+
+![Edit profile form](docs/images/admin-edit.png)
+
+### Frontend
+
+**`/sitemap/<store_code>/sitemap_index.xml`** — the XSL stylesheet renders a human-readable table view of the sitemap index in the browser while the underlying response stays a valid XML sitemap for crawlers.
+
+![XSL rendered sitemap](docs/images/sitemap-xsl-preview.png)
 
 ---
 

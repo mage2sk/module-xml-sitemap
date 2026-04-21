@@ -4,6 +4,14 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.7] — 2026-04-21
+
+### Added
+
+- **README Preview section** with 4 admin screenshots + a 900×506
+  walkthrough GIF. Screenshots enhanced via ImageMagick (shadow +
+  1800px + quality 88). GIF is 4× speed, 12 fps, 2-pass ffmpeg palette.
+
 ## [1.0.6] — 2026-04-21
 
 ### Changed
