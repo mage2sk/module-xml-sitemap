@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="panth_xml_sitemap.sitemap_shard.consumer"
+              queue="panth_xml_sitemap.sitemap_shard.q"
+              connection="db"
+              maxMessages="100"
+              consumerInstance="Panth\XmlSitemap\Model\Queue\ShardConsumer"
+              handler="Panth\XmlSitemap\Model\Queue\ShardConsumer::process"/>
+</config>

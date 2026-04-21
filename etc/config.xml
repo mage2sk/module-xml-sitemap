@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Panth XML Sitemap — Default config values.
+ *
+ * The section id `panth_xml_sitemap` is deliberately scoped off so this module
+ * can coexist with Panth_AdvancedSEO's `panth_seo` section without colliding.
+ *
+ * Defaults are migrated verbatim from the legacy `panth_seo/sitemap/*` block
+ * in Panth_AdvancedSEO, reorganised into the new group structure.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <panth_xml_sitemap>
+            <general>
+                <enabled>1</enabled>
+                <homepage_optimization>1</homepage_optimization>
+            </general>
+            <generation>
+                <shard_size>45000</shard_size>
+                <gzip>1</gzip>
+                <xsl_enabled>1</xsl_enabled>
+                <exclude_out_of_stock>1</exclude_out_of_stock>
+                <exclude_noindex>1</exclude_noindex>
+            </generation>
+            <hreflang>
+                <include_hreflang>1</include_hreflang>
+            </hreflang>
+            <media>
+                <include_images>1</include_images>
+                <product_image_source>base_image</product_image_source>
+                <include_video>0</include_video>
+            </media>
+            <ping>
+                <ping_google>1</ping_google>
+                <ping_bing>1</ping_bing>
+            </ping>
+            <additional>
+                <additional_links></additional_links>
+                <additional_links_changefreq>weekly</additional_links_changefreq>
+                <additional_links_priority>0.5</additional_links_priority>
+            </additional>
+        </panth_xml_sitemap>
+    </default>
+</config>

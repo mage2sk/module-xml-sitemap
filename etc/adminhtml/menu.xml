@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Panth XML Sitemap — Admin menu entries. Two links under Panth Infotech:
+ *   - Sitemap Profiles grid (CRUD for sitemap profile rows)
+ *   - Configuration (jumps to the system.xml section)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Panth_XmlSitemap::root"
+             title="XML Sitemap"
+             module="Panth_XmlSitemap"
+             parent="Panth_Core::panth_extensions"
+             sortOrder="20"
+             resource="Panth_XmlSitemap::manage"/>
+
+        <add id="Panth_XmlSitemap::profiles_menu"
+             title="Sitemap Profiles"
+             module="Panth_XmlSitemap"
+             parent="Panth_XmlSitemap::root"
+             sortOrder="10"
+             action="panth_xml_sitemap/profile/index"
+             resource="Panth_XmlSitemap::profiles"/>
+
+        <add id="Panth_XmlSitemap::config_menu"
+             title="Configuration"
+             module="Panth_XmlSitemap"
+             parent="Panth_XmlSitemap::root"
+             sortOrder="20"
+             action="adminhtml/system_config/edit/section/panth_xml_sitemap"
+             resource="Panth_XmlSitemap::config"/>
+    </menu>
+</config>

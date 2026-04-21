@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Interface bindings -->
+    <preference for="Panth\XmlSitemap\Api\BuilderInterface" type="Panth\XmlSitemap\Model\Sitemap\Builder"/>
+
+    <!-- Sitemap contributors (DI list). Builder iterates these in declared order.
+         Disable Product/Category contributors if enabling Image/Hreflang variants
+         to avoid duplicate <url> entries. -->
+    <type name="Panth\XmlSitemap\Model\Sitemap\Builder">
+        <arguments>
+            <argument name="contributors" xsi:type="array">
+                <item name="product" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\ProductContributor</item>
+                <item name="category" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\CategoryContributor</item>
+                <item name="cms_page" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\CmsPageContributor</item>
+                <item name="landing_page" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\LandingPageContributor</item>
+                <item name="blog" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\BlogContributor</item>
+                <item name="video" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\VideoContributor</item>
+                <item name="additional_links" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\AdditionalLinksContributor</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Grid collection: real PHP class extending SearchResult -->
+    <type name="Panth\XmlSitemap\Model\ResourceModel\Profile\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">panth_seo_sitemap_profile</argument>
+            <argument name="resourceModel" xsi:type="string">Panth\XmlSitemap\Model\ResourceModel\Profile</argument>
+        </arguments>
+    </type>
+
+    <!-- Data Provider Configuration: register grid data source -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="panth_xml_sitemap_profile_listing_data_source" xsi:type="string">Panth\XmlSitemap\Model\ResourceModel\Profile\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Queue merger registration for the sitemap shard topic -->
+    <type name="Magento\Framework\MessageQueue\MergerFactory">
+        <arguments>
+            <argument name="mergers" xsi:type="array">
+                <item name="panth_xml_sitemap.sitemap_shard" xsi:type="string">Magento\Framework\MessageQueue\Merger</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Console commands -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="panth_xml_sitemap_generate" xsi:type="object">Panth\XmlSitemap\Console\Command\GenerateCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

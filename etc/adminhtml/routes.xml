@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Panth XML Sitemap — Admin router declaration.
+ *
+ * The frontName `panth_xml_sitemap` scopes every admin action under
+ * /admin/panth_xml_sitemap/... so routes never collide with Panth_AdvancedSEO
+ * (`panth_seo`) if both modules are installed side by side.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="panth_xml_sitemap" frontName="panth_xml_sitemap">
+            <module name="Panth_XmlSitemap" before="Magento_Backend"/>
+        </route>
+    </router>
+</config>

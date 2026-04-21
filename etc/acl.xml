@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Panth XML Sitemap — ACL
+ *
+ * Two-branch ACL: the Panth_Core::panth_extensions branch gates the direct
+ * menu links (Sitemap Profiles grid), and the Magento_Config::config branch
+ * gates the system.xml section (Configuration link).
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Panth_Core::panth_extensions">
+                    <resource id="Panth_XmlSitemap::manage"
+                              title="Panth XML Sitemap"
+                              sortOrder="20">
+                        <resource id="Panth_XmlSitemap::profiles"
+                                  title="Sitemap Profiles"
+                                  sortOrder="10">
+                            <resource id="Panth_XmlSitemap::profiles_save"
+                                      title="Save / Delete Sitemap Profiles"
+                                      sortOrder="10"/>
+                        </resource>
+                    </resource>
+                </resource>
+
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Panth_XmlSitemap::config"
+                                      title="Panth XML Sitemap Configuration"
+                                      sortOrder="200"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>
