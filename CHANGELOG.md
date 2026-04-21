@@ -4,6 +4,30 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.3] — 2026-04-21
+
+### Fixed
+
+- **Every system-config toggle was dead.** `Helper/Config.php` still
+  read the pre-extraction paths `panth_seo/sitemap/*` while the admin
+  UI writes to the new `panth_xml_sitemap/*` tree declared in
+  `system.xml`. Flipping any field in the XML Sitemap config section
+  did nothing. Every XML_SITEMAP_* constant rewritten to the new path:
+  - General: `general/enabled`, `general/homepage_optimization`
+  - Generation: `generation/shard_size`, `generation/gzip`,
+    `generation/xsl_enabled`, `generation/exclude_out_of_stock`,
+    `generation/exclude_noindex`
+  - Hreflang: `hreflang/include_hreflang`
+  - Media: `media/include_images`, `media/product_image_source`,
+    `media/include_video`
+  - Ping: `ping/ping_google`, `ping/ping_bing`
+  - Additional: `additional/additional_links`,
+    `additional/additional_links_changefreq`,
+    `additional/additional_links_priority`
+- `Model\Sitemap\SearchEnginePinger`, `VideoContributor`,
+  `AdditionalLinksContributor` and `Builder` had the same stale paths
+  hard-coded in private consts / arrays — all rewritten to match.
+
 ## [1.0.2] — 2026-04-21
 
 ### Fixed

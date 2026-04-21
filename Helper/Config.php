@@ -9,32 +9,35 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
 
 /**
- * Config-access facade for `panth_seo/sitemap/*` fields.
+ * Config-access facade for the `panth_xml_sitemap/*` system-config section.
  *
- * The config paths remain `panth_seo/sitemap/*` so existing admin config values
- * continue to work after the sitemap engine was extracted into its own module.
+ * The section was reorganised during the extraction from Panth_AdvancedSEO:
+ * fields are now split across six groups (general, generation, hreflang,
+ * media, ping, additional) mirroring the admin UI.
  */
 class Config extends AbstractHelper
 {
-    public const XML_SITEMAP_ENABLED          = 'panth_seo/sitemap/enabled';
-    public const XML_SITEMAP_SHARD_SIZE       = 'panth_seo/sitemap/shard_size';
-    public const XML_SITEMAP_GZIP             = 'panth_seo/sitemap/gzip';
-    public const XML_SITEMAP_INCLUDE_IMAGES   = 'panth_seo/sitemap/include_images';
-    public const XML_SITEMAP_INCLUDE_HREFLANG = 'panth_seo/sitemap/include_hreflang';
-    public const XML_SITEMAP_INCLUDE_VIDEO    = 'panth_seo/sitemap/include_video';
+    public const XML_SITEMAP_ENABLED               = 'panth_xml_sitemap/general/enabled';
+    public const XML_SITEMAP_HOMEPAGE_OPTIMIZATION = 'panth_xml_sitemap/general/homepage_optimization';
 
-    public const XML_SITEMAP_EXCLUDE_OOS     = 'panth_seo/sitemap/exclude_out_of_stock';
-    public const XML_SITEMAP_EXCLUDE_NOINDEX = 'panth_seo/sitemap/exclude_noindex';
-    public const XML_SITEMAP_ADDITIONAL      = 'panth_seo/sitemap/additional_links';
-    public const XML_SITEMAP_XSL_ENABLED     = 'panth_seo/sitemap/xsl_enabled';
+    public const XML_SITEMAP_SHARD_SIZE      = 'panth_xml_sitemap/generation/shard_size';
+    public const XML_SITEMAP_GZIP            = 'panth_xml_sitemap/generation/gzip';
+    public const XML_SITEMAP_XSL_ENABLED     = 'panth_xml_sitemap/generation/xsl_enabled';
+    public const XML_SITEMAP_EXCLUDE_OOS     = 'panth_xml_sitemap/generation/exclude_out_of_stock';
+    public const XML_SITEMAP_EXCLUDE_NOINDEX = 'panth_xml_sitemap/generation/exclude_noindex';
 
-    public const XML_SITEMAP_PING_GOOGLE               = 'panth_seo/sitemap/ping_google';
-    public const XML_SITEMAP_PING_BING                 = 'panth_seo/sitemap/ping_bing';
-    public const XML_SITEMAP_ADDITIONAL_LINKS_FREQ     = 'panth_seo/sitemap/additional_links_changefreq';
-    public const XML_SITEMAP_ADDITIONAL_LINKS_PRIORITY = 'panth_seo/sitemap/additional_links_priority';
+    public const XML_SITEMAP_INCLUDE_HREFLANG = 'panth_xml_sitemap/hreflang/include_hreflang';
 
-    public const XML_SITEMAP_HOMEPAGE_OPTIMIZATION = 'panth_seo/sitemap/homepage_optimization';
-    public const XML_SITEMAP_PRODUCT_IMAGE_SOURCE  = 'panth_seo/sitemap/product_image_source';
+    public const XML_SITEMAP_INCLUDE_IMAGES       = 'panth_xml_sitemap/media/include_images';
+    public const XML_SITEMAP_PRODUCT_IMAGE_SOURCE = 'panth_xml_sitemap/media/product_image_source';
+    public const XML_SITEMAP_INCLUDE_VIDEO        = 'panth_xml_sitemap/media/include_video';
+
+    public const XML_SITEMAP_PING_GOOGLE = 'panth_xml_sitemap/ping/ping_google';
+    public const XML_SITEMAP_PING_BING   = 'panth_xml_sitemap/ping/ping_bing';
+
+    public const XML_SITEMAP_ADDITIONAL                = 'panth_xml_sitemap/additional/additional_links';
+    public const XML_SITEMAP_ADDITIONAL_LINKS_FREQ     = 'panth_xml_sitemap/additional/additional_links_changefreq';
+    public const XML_SITEMAP_ADDITIONAL_LINKS_PRIORITY = 'panth_xml_sitemap/additional/additional_links_priority';
 
     public function __construct(
         Context $context,

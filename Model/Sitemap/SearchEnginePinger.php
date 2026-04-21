@@ -17,11 +17,11 @@ class SearchEnginePinger
     private const ENGINES = [
         'google' => [
             'url'    => 'https://www.google.com/ping?sitemap=',
-            'config' => 'panth_seo/sitemap/ping_google',
+            'config' => 'panth_xml_sitemap/ping/ping_google',
         ],
         'bing' => [
             'url'    => 'https://www.bing.com/ping?sitemap=',
-            'config' => 'panth_seo/sitemap/ping_bing',
+            'config' => 'panth_xml_sitemap/ping/ping_bing',
         ],
     ];
 

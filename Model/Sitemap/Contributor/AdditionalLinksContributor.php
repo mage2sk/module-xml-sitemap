@@ -14,9 +14,9 @@ use Panth\XmlSitemap\Api\ContributorInterface;
  */
 class AdditionalLinksContributor implements ContributorInterface
 {
-    private const CONFIG_LINKS      = 'panth_seo/sitemap/additional_links';
-    private const CONFIG_CHANGEFREQ = 'panth_seo/sitemap/additional_links_changefreq';
-    private const CONFIG_PRIORITY   = 'panth_seo/sitemap/additional_links_priority';
+    private const CONFIG_LINKS      = 'panth_xml_sitemap/additional/additional_links';
+    private const CONFIG_CHANGEFREQ = 'panth_xml_sitemap/additional/additional_links_changefreq';
+    private const CONFIG_PRIORITY   = 'panth_xml_sitemap/additional/additional_links_priority';
 
     private const DEFAULT_CHANGEFREQ = 'monthly';
     private const DEFAULT_PRIORITY   = 0.5;

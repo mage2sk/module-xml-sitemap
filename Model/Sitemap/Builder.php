@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
  *
  * Output directory: pub/sitemap/panth/<store_code>/
  *
- * When `panth_seo/sitemap/xsl_enabled` is active, writes a human-readable XSL
+ * When `panth_xml_sitemap/generation/xsl_enabled` is active, writes a human-readable XSL
  * stylesheet next to the shard files and references it via an
  * `<?xml-stylesheet?>` processing instruction in every shard.
  */

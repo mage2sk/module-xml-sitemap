@@ -18,7 +18,7 @@ use Panth\XmlSitemap\Api\ContributorInterface;
  */
 class VideoContributor implements ContributorInterface
 {
-    private const XML_INCLUDE_VIDEO = 'panth_seo/sitemap/include_video';
+    private const XML_INCLUDE_VIDEO = 'panth_xml_sitemap/media/include_video';
 
     public function __construct(
         private readonly ResourceConnection $resource,
