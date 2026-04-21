@@ -9,6 +9,7 @@
     <settings>
         <buttons>
             <button name="delete" class="Panth\XmlSitemap\Block\Adminhtml\GenericDeleteButton"/>
+            <button name="view" class="Panth\XmlSitemap\Block\Adminhtml\Profile\Edit\ViewSitemapButton"/>
             <button name="generate" class="Panth\XmlSitemap\Block\Adminhtml\Profile\Edit\GenerateButton"/>
             <button name="save_and_continue" class="Panth\XmlSitemap\Block\Adminhtml\Profile\Edit\SaveAndContinueButton"/>
             <button name="save" class="Panth\XmlSitemap\Block\Adminhtml\Profile\Edit\SaveButton"/>

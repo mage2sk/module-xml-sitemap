@@ -38,14 +38,19 @@ class ProfileActions extends Column
                 continue;
             }
 
-            // Build the view sitemap URL
-            $sitemapUrl = $this->getSitemapUrl($item);
-            if ($sitemapUrl !== '') {
-                $item[$name]['view'] = [
-                    'href' => $sitemapUrl,
-                    'label' => (string) __('View Sitemap'),
-                    'target' => '_blank',
-                ];
+            // Build the view sitemap URL. Only surface the action when the
+            // profile has actually been generated; otherwise the link would
+            // 404. Respect the profile's `output_path` template.
+            $fileCount = (int) ($item['file_count'] ?? 0);
+            if ($fileCount > 0) {
+                $sitemapUrl = $this->getSitemapUrl($item);
+                if ($sitemapUrl !== '') {
+                    $item[$name]['view'] = [
+                        'href' => $sitemapUrl,
+                        'label' => (string) __('View Sitemap'),
+                        'target' => '_blank',
+                    ];
+                }
             }
 
             $item[$name]['edit'] = [
@@ -74,21 +79,24 @@ class ProfileActions extends Column
 
     private function getSitemapUrl(array $item): string
     {
-        $fileCount = (int) ($item['file_count'] ?? 0);
-        if ($fileCount === 0) {
-            return '';
-        }
-
         try {
             $storeId = (int) ($item['store_id'] ?? 1);
             if ($storeId === 0) {
-                $storeId = 1;
+                $storeId = (int) $this->storeManager->getDefaultStoreView()?->getId() ?: 1;
             }
-            $store = $this->storeManager->getStore($storeId);
-            $baseUrl = rtrim((string) $store->getBaseUrl(UrlInterface::URL_TYPE_WEB), '/');
+            $store     = $this->storeManager->getStore($storeId);
+            $storeCode = (string) $store->getCode();
+            $baseUrl   = rtrim((string) $store->getBaseUrl(UrlInterface::URL_TYPE_WEB), '/');
             $profileId = (int) ($item['profile_id'] ?? 0);
-            $storeCode = $store->getCode();
-            return $baseUrl . '/sitemap/panth/' . $storeCode . '/profile-' . $profileId . '/sitemap_index.xml';
+
+            $outputPath = trim((string) ($item['output_path'] ?? ''));
+            if ($outputPath !== '') {
+                $relDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
+            } else {
+                $relDir = 'sitemap/panth/' . $storeCode . '/profile-' . $profileId;
+            }
+
+            return $baseUrl . '/' . ltrim($relDir, '/') . '/sitemap_index.xml';
         } catch (\Throwable) {
             return '';
         }

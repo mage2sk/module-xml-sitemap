@@ -4,6 +4,21 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.5] — 2026-04-21
+
+### Added
+
+- **"View Sitemap" toolbar button on the Edit Profile form.** Opens the
+  generated `sitemap_index.xml` in a new tab. Hidden until the profile
+  has been generated at least once (`file_count > 0`). Respects the
+  profile's `output_path` template so custom locations work.
+
+### Fixed
+
+- **Grid "View Sitemap" row action honours the `output_path` template.**
+  Previously hardcoded `sitemap/panth/<store>/profile-N/...`; now resolves
+  `{store_code}` from the column when set.
+
 ## [1.0.4] — 2026-04-21
 
 ### Fixed
