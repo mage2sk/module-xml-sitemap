@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Panth\XmlSitemap\Model\Sitemap\Contributor;
 
 use Magento\Store\Model\StoreManagerInterface;
-use Panth\AdvancedSEO\Model\LandingPage\LandingPageDetector;
+use Panth\StructuredData\Model\LandingPage\LandingPageDetector;
 use Panth\XmlSitemap\Api\ContributorInterface;
 
 /**

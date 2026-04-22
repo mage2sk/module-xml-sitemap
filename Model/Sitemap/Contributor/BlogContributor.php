@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Panth\XmlSitemap\Model\Sitemap\Contributor;
 
-use Panth\AdvancedSEO\Model\Blog\BlogDetector;
+use Panth\StructuredData\Model\Blog\BlogDetector;
 use Panth\XmlSitemap\Api\ContributorInterface;
 
 /**

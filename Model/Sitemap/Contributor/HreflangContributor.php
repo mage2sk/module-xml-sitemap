@@ -5,7 +5,7 @@ namespace Panth\XmlSitemap\Model\Sitemap\Contributor;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
-use Panth\AdvancedSEO\Api\HreflangResolverInterface;
+use Panth\Hreflang\Api\HreflangResolverInterface;
 use Panth\AdvancedSEO\Helper\Config as AdvancedSeoConfig;
 use Panth\XmlSitemap\Api\ContributorInterface;
 use Panth\XmlSitemap\Helper\Config;
