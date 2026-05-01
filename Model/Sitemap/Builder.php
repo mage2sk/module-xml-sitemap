@@ -114,7 +114,9 @@ class Builder implements BuilderInterface
             $urlCount = 0;
         };
 
-        $closeShard = function () use (&$shard, &$shards, &$files, $storeCode, $baseUrl, $now): void {
+        $pathResolver = $this->pathResolver;
+        $relDirForLegacy = 'sitemap/' . trim($storeCode, '/');
+        $closeShard = function () use (&$shard, &$shards, &$files, $baseUrl, $relDirForLegacy, $now, $pathResolver): void {
             if ($shard === null) {
                 return;
             }
@@ -122,7 +124,7 @@ class Builder implements BuilderInterface
             $files[] = $path;
             $filename = basename($path);
             $shards[] = [
-                'loc'     => $baseUrl . '/sitemap/' . $storeCode . '/' . $filename,
+                'loc'     => $pathResolver->buildSitemapUrl($baseUrl, $relDirForLegacy, $filename),
                 'lastmod' => $now,
             ];
             $shard = null;
@@ -138,6 +140,11 @@ class Builder implements BuilderInterface
                         if (!is_array($url) || empty($url['loc'])) {
                             continue;
                         }
+                        // Normalise the URL one final time before it
+                        // gets pinned into a sitemap file — guarantees
+                        // no `//` ever lands in <loc> regardless of
+                        // contributor-side path concat oddities.
+                        $url['loc'] = $this->pathResolver->normaliseUrl((string) $url['loc']);
                         if ($shard === null) {
                             $openShard();
                         }
@@ -167,7 +174,7 @@ class Builder implements BuilderInterface
                 $sitemapUrl = $shards[0]['loc'] ?? '';
                 if (count($shards) > 1) {
                     // Use the sitemap index URL when multiple shards exist
-                    $sitemapUrl = $baseUrl . '/sitemap/' . $storeCode . '/sitemap_index.xml';
+                    $sitemapUrl = $this->pathResolver->buildSitemapUrl($baseUrl, $relDirForLegacy);
                 }
                 $this->pingSearchEngines($storeId, $sitemapUrl);
             }
@@ -234,13 +241,14 @@ class Builder implements BuilderInterface
         $xml->startDocument('1.0', 'UTF-8');
 
         if ($xslEnabled) {
+            $xslUrl = $this->pathResolver->buildSitemapUrl(
+                $baseUrl,
+                'sitemap/' . trim((string) $store->getCode(), '/'),
+                self::XSL_FILENAME
+            );
             $xml->writePi(
                 'xml-stylesheet',
-                'type="text/xsl" href="' . htmlspecialchars(
-                    $baseUrl . '/sitemap/' . $store->getCode() . '/' . self::XSL_FILENAME,
-                    ENT_XML1 | ENT_QUOTES,
-                    'UTF-8'
-                ) . '"'
+                'type="text/xsl" href="' . htmlspecialchars($xslUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"'
             );
         }
 
@@ -273,10 +281,10 @@ class Builder implements BuilderInterface
                     if (!is_array($url) || empty($url['loc'])) {
                         continue;
                     }
-                    $loc = (string) $url['loc'];
+                    $loc = $this->pathResolver->normaliseUrl((string) $url['loc']);
                     // Dedup across contributors so CMS + LandingPage + Blog
                     // can't emit the same URL twice.
-                    if (isset($seenLocs[$loc])) {
+                    if ($loc === '' || isset($seenLocs[$loc])) {
                         continue;
                     }
                     $seenLocs[$loc] = true;
@@ -669,6 +677,9 @@ class Builder implements BuilderInterface
             if (!is_array($url) || empty($url['loc'])) {
                 continue;
             }
+            // Final URL normalisation — collapses any `//` introduced
+            // upstream by contributors that did their own concat.
+            $url['loc'] = $this->pathResolver->normaliseUrl((string) $url['loc']);
 
             // Ensure lastmod is present (Google 2026 best practice)
             if (empty($url['lastmod'])) {
@@ -760,7 +771,7 @@ class Builder implements BuilderInterface
             }
 
             $url = [
-                'loc'        => $link['loc'],
+                'loc'        => $this->pathResolver->normaliseUrl((string) $link['loc']),
                 'lastmod'    => $now,
                 'changefreq' => $link['changefreq'] ?? $defaultChangefreq,
                 'priority'   => $link['priority'] ?? $defaultPriority,
@@ -909,7 +920,9 @@ class Builder implements BuilderInterface
                     if ($loc === null || $loc === '') {
                         continue;
                     }
-                    $url = str_starts_with($loc, 'http') ? $loc : $baseUrl . '/' . ltrim($loc, '/');
+                    $url = str_starts_with($loc, 'http')
+                        ? $this->pathResolver->normaliseUrl($loc)
+                        : $this->pathResolver->normaliseUrl($baseUrl . '/' . ltrim($loc, '/'));
                     $entry = ['loc' => $url];
                     if ($changefreq !== null && $changefreq !== '') {
                         $entry['changefreq'] = $changefreq;
@@ -927,12 +940,14 @@ class Builder implements BuilderInterface
             $links = [];
             foreach ($raw as $item) {
                 if (is_string($item)) {
-                    $url = str_starts_with($item, 'http') ? $item : $baseUrl . '/' . ltrim($item, '/');
+                    $url = str_starts_with($item, 'http')
+                        ? $this->pathResolver->normaliseUrl($item)
+                        : $this->pathResolver->normaliseUrl($baseUrl . '/' . ltrim($item, '/'));
                     $links[] = ['loc' => $url];
                 } elseif (is_array($item) && !empty($item['loc'])) {
                     $url = str_starts_with($item['loc'], 'http')
-                        ? $item['loc']
-                        : $baseUrl . '/' . ltrim($item['loc'], '/');
+                        ? $this->pathResolver->normaliseUrl($item['loc'])
+                        : $this->pathResolver->normaliseUrl($baseUrl . '/' . ltrim($item['loc'], '/'));
                     $entry = ['loc' => $url];
                     if (isset($item['changefreq'])) {
                         $entry['changefreq'] = (string) $item['changefreq'];

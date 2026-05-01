@@ -56,14 +56,48 @@ class PathResolver
      *
      * Always emits exactly one slash between the base URL and the file
      * name, regardless of whether the relative directory is empty.
+     *
+     * Defence-in-depth: the result is run through {@see normaliseUrl()}
+     * so any double-slash that ever leaks through (a relative dir that
+     * starts with `/`, a base URL that contains `//foo` for whatever
+     * legacy reason, etc.) is collapsed before the URL is emitted into
+     * a sitemap_index.xml.
      */
     public function buildSitemapUrl(string $baseUrl, string $relativeDir, string $filename = 'sitemap_index.xml'): string
     {
         $base = rtrim($baseUrl, '/');
         $file = ltrim($filename, '/');
         if ($relativeDir === '') {
-            return $base . '/' . $file;
+            return $this->normaliseUrl($base . '/' . $file);
         }
-        return $base . '/' . trim($relativeDir, '/') . '/' . $file;
+        return $this->normaliseUrl($base . '/' . trim($relativeDir, '/') . '/' . $file);
+    }
+
+    /**
+     * Collapse `//` that appears anywhere AFTER the URL scheme down to a
+     * single `/`. Idempotent + protocol-safe (`https://host` is left
+     * alone). Use this any time a URL is hand-built by string concat.
+     *
+     * Example:
+     *
+     *     normaliseUrl('https://radheeimitation.com//sitemap-products-1.xml')
+     *         === 'https://radheeimitation.com/sitemap-products-1.xml'
+     */
+    public function normaliseUrl(string $url): string
+    {
+        if ($url === '') {
+            return '';
+        }
+        // Split on the scheme delimiter so the `https://` part is kept
+        // exactly as the caller passed it (we only normalise the path).
+        $schemeSeparator = '://';
+        $pos = strpos($url, $schemeSeparator);
+        if ($pos === false) {
+            return (string) preg_replace('#/+#', '/', $url);
+        }
+        $scheme = substr($url, 0, $pos + strlen($schemeSeparator));
+        $rest   = substr($url, $pos + strlen($schemeSeparator));
+        $rest   = (string) preg_replace('#/+#', '/', $rest);
+        return $scheme . $rest;
     }
 }
