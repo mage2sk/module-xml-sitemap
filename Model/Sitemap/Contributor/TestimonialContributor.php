@@ -31,15 +31,19 @@ use Psr\Log\LoggerInterface;
  *   - /{base}/category/{url_key}        → category landing (is_active = 1)
  *
  * The base segment defaults to `testimonials` but can be configured
- * via the source module's `panth_testimonials/general/base_url` path
- * — we read that config path with a graceful fallback so the
- * contributor stays decoupled.
+ * by the merchant in Stores → Configuration → Panth → Testimonials →
+ * URL Route. The source module's `system.xml` writes that field to
+ * `panth_testimonials/general/route` (matches Helper\Data::XML_PATH_ROUTE),
+ * which is the exact path we read here. v1.0.11 mistakenly read
+ * `panth_testimonials/general/base_url` — a path that nothing writes —
+ * so a merchant who renamed the route to e.g. `reviews` ended up with
+ * sitemap URLs pointing at `/testimonials/{slug}` (404).
  */
 class TestimonialContributor implements ContributorInterface
 {
     private const ITEM_TABLE     = 'panth_testimonial';
     private const CATEGORY_TABLE = 'panth_testimonial_category';
-    private const XML_BASE_URL   = 'panth_testimonials/general/base_url';
+    private const XML_ROUTE      = 'panth_testimonials/general/route';
     private const DEFAULT_BASE   = 'testimonials';
 
     public function __construct(
@@ -76,7 +80,7 @@ class TestimonialContributor implements ContributorInterface
 
         $store   = $this->storeManager->getStore($storeId);
         $baseUrl = rtrim((string) $store->getBaseUrl(), '/') . '/';
-        $base    = trim((string) ($this->scopeConfig->getValue(self::XML_BASE_URL, ScopeInterface::SCOPE_STORE, $storeId)
+        $base    = trim((string) ($this->scopeConfig->getValue(self::XML_ROUTE, ScopeInterface::SCOPE_STORE, $storeId)
             ?: self::DEFAULT_BASE), '/');
         if ($base === '') {
             $base = self::DEFAULT_BASE;
