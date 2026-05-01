@@ -137,6 +137,18 @@
                                 <item name="value" xsi:type="string">custom</item>
                                 <item name="label" xsi:type="string" translate="true">Custom Links</item>
                             </option>
+                            <option name="testimonial" xsi:type="array">
+                                <item name="value" xsi:type="string">testimonial</item>
+                                <item name="label" xsi:type="string" translate="true">Testimonials (if module installed)</item>
+                            </option>
+                            <option name="faq" xsi:type="array">
+                                <item name="value" xsi:type="string">faq</item>
+                                <item name="label" xsi:type="string" translate="true">FAQs (if module installed)</item>
+                            </option>
+                            <option name="dynamic_form" xsi:type="array">
+                                <item name="value" xsi:type="string">dynamic_form</item>
+                                <item name="label" xsi:type="string" translate="true">Dynamic Forms (if module installed)</item>
+                            </option>
                         </options>
                     </settings>
                 </multiselect>

@@ -33,10 +33,15 @@ class Builder implements BuilderInterface
 
     /** Entity type to file prefix mapping */
     private const ENTITY_PREFIX_MAP = [
-        'product'  => 'sitemap-products',
-        'category' => 'sitemap-categories',
-        'cms_page' => 'sitemap-cms',
-        'custom'   => 'sitemap-custom',
+        'product'      => 'sitemap-products',
+        'category'     => 'sitemap-categories',
+        'cms_page'     => 'sitemap-cms',
+        'custom'       => 'sitemap-custom',
+        // Optional integrations — own shard prefixes so the merchant
+        // can spot them at a glance in the file list.
+        'testimonial'  => 'sitemap-testimonials',
+        'faq'          => 'sitemap-faqs',
+        'dynamic_form' => 'sitemap-dynamic-forms',
     ];
 
     /**
@@ -220,6 +225,9 @@ class Builder implements BuilderInterface
             'cms_page'     => 'cms',
             'landing_page' => 'product',
             'blog'         => 'cms',
+            'testimonial'  => 'testimonial',
+            'faq'          => 'faq',
+            'dynamic_form' => 'dynamic_form',
         ];
         $profileConfig = $profile ? [
             'exclude_out_of_stock'   => (bool) ($profile['exclude_out_of_stock'] ?? false),
@@ -508,16 +516,20 @@ class Builder implements BuilderInterface
 
         // Map contributor codes to entity type prefixes
         $contributorEntityMap = [
-            'product'  => 'product',
-            'category' => 'category',
-            'cms_page' => 'cms_page',
+            'product'      => 'product',
+            'category'     => 'category',
+            'cms_page'     => 'cms_page',
+            'testimonial'  => 'testimonial',
+            'faq'          => 'faq',
+            'dynamic_form' => 'dynamic_form',
         ];
 
         // Profile-level entity-type filter. Empty = include everything (back-compat).
-        // Contributors not mapped into one of the four admin buckets
-        // (product / category / cms / custom) are treated as always-on
-        // decorators (hreflang, image, video additions run alongside their
-        // host entity) and skipped from this gating.
+        // Contributors not mapped into one of the admin buckets
+        // (product / category / cms / custom / testimonial / faq) are
+        // treated as always-on decorators (hreflang, image, video
+        // additions run alongside their host entity) and skipped from
+        // this gating.
         $allowedBuckets = $this->resolveEntityBuckets((string) ($profile['entity_types'] ?? ''));
         $contributorBucketMap = [
             'product'       => 'product',
@@ -525,6 +537,8 @@ class Builder implements BuilderInterface
             'cms_page'      => 'cms',
             'landing_page'  => 'product',
             'blog'          => 'cms',
+            'testimonial'   => 'testimonial',
+            'faq'           => 'faq',
         ];
 
         // Generate files per contributor (each entity type gets its own shard series)

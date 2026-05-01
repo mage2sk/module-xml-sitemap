@@ -16,6 +16,15 @@
                 <item name="landing_page" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\LandingPageContributor</item>
                 <item name="blog" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\BlogContributor</item>
                 <item name="video" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\VideoContributor</item>
+                <!--
+                  Optional integrations — the contributors below stay
+                  silent (yield zero URLs) when their source module's
+                  tables aren't installed. Safe to leave registered on
+                  every site.
+                -->
+                <item name="testimonial" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\TestimonialContributor</item>
+                <item name="faq" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\FaqContributor</item>
+                <item name="dynamic_form" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\DynamicFormContributor</item>
                 <item name="additional_links" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\AdditionalLinksContributor</item>
             </argument>
         </arguments>
