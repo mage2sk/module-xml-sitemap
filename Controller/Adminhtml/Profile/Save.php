@@ -6,8 +6,10 @@ namespace Panth\XmlSitemap\Controller\Adminhtml\Profile;
 use Panth\XmlSitemap\Controller\Adminhtml\AbstractAction;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Backend\App\Action\Context;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Save extends AbstractAction implements HttpPostActionInterface
 {
@@ -16,7 +18,8 @@ class Save extends AbstractAction implements HttpPostActionInterface
     public function __construct(
         Context $context,
         private readonly ResourceConnection $resource,
-        private readonly DateTime $dateTime
+        private readonly DateTime $dateTime,
+        private readonly StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
     }
@@ -31,6 +34,24 @@ class Save extends AbstractAction implements HttpPostActionInterface
 
         $id = (int)($data['profile_id'] ?? 0);
 
+        // Defence-in-depth: the form's StoreViewSource only offers real
+        // store views, but a hand-crafted POST could still try to land
+        // store_id = 0 ("All Store Views"). Reject it here so the row
+        // never reaches the database.
+        $storeId = (int)($data['store_id'] ?? 0);
+        if ($storeId <= 0) {
+            $this->messageManager->addErrorMessage(
+                __('Pick a single store view — sitemap profiles are scoped per store view.')
+            );
+            return $resultRedirect->setPath('*/*/edit', $id > 0 ? ['id' => $id] : []);
+        }
+        try {
+            $this->storeManager->getStore($storeId);
+        } catch (NoSuchEntityException) {
+            $this->messageManager->addErrorMessage(__('The selected store view no longer exists.'));
+            return $resultRedirect->setPath('*/*/edit', $id > 0 ? ['id' => $id] : []);
+        }
+
         // Handle entity_types - could come as array from checkboxes or comma-separated string
         $entityTypes = $data['entity_types'] ?? 'product,category,cms';
         if (is_array($entityTypes)) {
@@ -39,7 +60,7 @@ class Save extends AbstractAction implements HttpPostActionInterface
 
         $row = [
             'name' => mb_substr((string)($data['name'] ?? ''), 0, 255),
-            'store_id' => (int)($data['store_id'] ?? 0),
+            'store_id' => $storeId,
             'entity_types' => $entityTypes,
             'include_images' => (int)($data['include_images'] ?? 1),
             'include_video' => (int)($data['include_video'] ?? 0),

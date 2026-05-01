@@ -11,6 +11,7 @@ use Magento\Framework\HTTP\ClientInterface;
 use Panth\XmlSitemap\Api\BuilderInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 use Panth\XmlSitemap\Helper\Config;
+use Panth\XmlSitemap\Helper\PathResolver;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -52,6 +53,7 @@ class Builder implements BuilderInterface
         private readonly ClientInterface $httpClient,
         private readonly XslStylesheet $xslStylesheet,
         private readonly ResourceConnection $resourceConnection,
+        private readonly PathResolver $pathResolver,
         private readonly array $contributors = []
     ) {
     }
@@ -449,20 +451,18 @@ class Builder implements BuilderInterface
         // Per-entity changefreq/priority from profile (JSON-decoded or direct columns)
         $entitySettings = $this->resolveEntitySettings($profile);
 
-        // Output path honours the profile's `output_path` template with the
-        // `{store_code}` placeholder. Default keeps the path short —
-        // `sitemap/<store_code>/` — so `sitemap_index.xml` lands one folder
-        // deep. Multi-store installs still avoid collisions via the store
-        // subdirectory.
-        $outputPath = trim((string) ($profile['output_path'] ?? ''));
-        if ($outputPath !== '') {
-            $profileDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
-        } else {
-            $profileDir = 'sitemap/' . $storeCode;
-        }
+        // Resolve the output directory through PathResolver so empty
+        // input lands at pub/ root (clean `/sitemap_index.xml` URL) and
+        // any stray slashes are collapsed exactly once.
+        $outputPath = (string) ($profile['output_path'] ?? '');
+        $profileDir = $this->pathResolver->resolveRelativeDir($outputPath, $storeCode);
         $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
-        $pub->create($profileDir);
-        $absDir = $pub->getAbsolutePath($profileDir);
+        if ($profileDir !== '') {
+            $pub->create($profileDir);
+            $absDir = $pub->getAbsolutePath($profileDir);
+        } else {
+            $absDir = $pub->getAbsolutePath();
+        }
 
         // Clean old shard files for this profile
         foreach (glob(rtrim($absDir, '/') . '/sitemap-*.xml') ?: [] as $old) {
@@ -597,7 +597,7 @@ class Builder implements BuilderInterface
 
         // Ping search engines
         if (!empty($indexEntries)) {
-            $sitemapUrl = $baseUrl . '/' . $profileDir . '/sitemap_index.xml';
+            $sitemapUrl = $this->pathResolver->buildSitemapUrl($baseUrl, $profileDir);
             $this->pingSearchEngines($storeId, $sitemapUrl);
         }
 
@@ -650,7 +650,8 @@ class Builder implements BuilderInterface
             $shardUrlCount = 0;
         };
 
-        $closeShard = function () use (&$shard, &$shards, &$files, $baseUrl, $profileDir, $now): void {
+        $pathResolver = $this->pathResolver;
+        $closeShard = function () use (&$shard, &$shards, &$files, $baseUrl, $profileDir, $now, $pathResolver): void {
             if ($shard === null) {
                 return;
             }
@@ -658,7 +659,7 @@ class Builder implements BuilderInterface
             $files[] = $path;
             $filename = basename($path);
             $shards[] = [
-                'loc'     => $baseUrl . '/' . $profileDir . '/' . $filename,
+                'loc'     => $pathResolver->buildSitemapUrl($baseUrl, $profileDir, $filename),
                 'lastmod' => $now,
             ];
             $shard = null;
@@ -738,7 +739,8 @@ class Builder implements BuilderInterface
             $shardUrlCount = 0;
         };
 
-        $closeShard = function () use (&$shard, &$shards, &$files, $baseUrl, $profileDir, $now): void {
+        $pathResolver = $this->pathResolver;
+        $closeShard = function () use (&$shard, &$shards, &$files, $baseUrl, $profileDir, $now, $pathResolver): void {
             if ($shard === null) {
                 return;
             }
@@ -746,7 +748,7 @@ class Builder implements BuilderInterface
             $files[] = $path;
             $filename = basename($path);
             $shards[] = [
-                'loc'     => $baseUrl . '/' . $profileDir . '/' . $filename,
+                'loc'     => $pathResolver->buildSitemapUrl($baseUrl, $profileDir, $filename),
                 'lastmod' => $now,
             ];
             $shard = null;

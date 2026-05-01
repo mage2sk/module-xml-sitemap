@@ -8,6 +8,7 @@ use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Panth\XmlSitemap\Helper\PathResolver;
 
 /**
  * "View Sitemap" toolbar button — opens the generated sitemap_index.xml
@@ -23,7 +24,8 @@ class ViewSitemapButton implements ButtonProviderInterface
         private readonly UrlInterface $urlBuilder,
         private readonly RequestInterface $request,
         private readonly Registry $registry,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly PathResolver $pathResolver
     ) {
     }
 
@@ -61,21 +63,14 @@ class ViewSitemapButton implements ButtonProviderInterface
     {
         try {
             $storeId = (int) ($profile['store_id'] ?? 0);
-            if ($storeId === 0) {
-                $storeId = (int) $this->storeManager->getDefaultStoreView()?->getId() ?: 1;
+            if ($storeId <= 0) {
+                $storeId = (int) ($this->storeManager->getDefaultStoreView()?->getId() ?: 1);
             }
             $store     = $this->storeManager->getStore($storeId);
             $storeCode = (string) $store->getCode();
-            $baseUrl   = rtrim((string) $store->getBaseUrl(UrlInterface::URL_TYPE_WEB), '/');
-
-            $outputPath = trim((string) ($profile['output_path'] ?? ''));
-            if ($outputPath !== '') {
-                $relDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
-            } else {
-                $relDir = 'sitemap/' . $storeCode;
-            }
-
-            return $baseUrl . '/' . ltrim($relDir, '/') . '/sitemap_index.xml';
+            $baseUrl   = (string) $store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
+            $relDir    = $this->pathResolver->resolveRelativeDir((string) ($profile['output_path'] ?? ''), $storeCode);
+            return $this->pathResolver->buildSitemapUrl($baseUrl, $relDir);
         } catch (\Throwable) {
             return '';
         }

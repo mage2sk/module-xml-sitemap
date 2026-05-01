@@ -114,6 +114,14 @@
                 <options class="Magento\Config\Model\Config\Source\Yesno"/>
             </settings>
         </column>
+        <column name="sitemap_url" class="Panth\XmlSitemap\Ui\Component\Listing\Column\SitemapUrl">
+            <settings>
+                <label translate="true">Sitemap URL</label>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <sortable>false</sortable>
+                <filter>false</filter>
+            </settings>
+        </column>
         <actionsColumn name="actions" class="Panth\XmlSitemap\Ui\Component\Listing\Column\ProfileActions">
             <settings>
                 <indexField>profile_id</indexField>

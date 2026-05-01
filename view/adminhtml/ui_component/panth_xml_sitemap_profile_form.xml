@@ -64,12 +64,15 @@
                 <dataType>int</dataType>
                 <label translate="true">Store View</label>
                 <dataScope>store_id</dataScope>
-                <notice translate="true">Select "All Store Views" to generate a sitemap covering all stores, or choose a specific store view.</notice>
+                <notice translate="true">Pick the single store view this profile belongs to. Each store view needs its own profile — generating one sitemap that covers all stores is intentionally not supported.</notice>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
             </settings>
             <formElements>
                 <select>
                     <settings>
-                        <options class="Magento\Cms\Ui\Component\Listing\Column\Cms\Options"/>
+                        <options class="Panth\XmlSitemap\Ui\Component\Form\StoreViewSource"/>
                     </settings>
                 </select>
             </formElements>
@@ -502,7 +505,7 @@
                 <dataType>text</dataType>
                 <label translate="true">Output Path</label>
                 <dataScope>output_path</dataScope>
-                <notice translate="true">Relative path from pub/ directory. Use {store_code} placeholder for store-specific directories. Default: sitemap/panth/{store_code}/</notice>
+                <notice translate="true">Relative directory below pub/. Leave blank to write the sitemap directly at the document root (URL ends in /sitemap_index.xml). Use {store_code} placeholder for store-specific subdirectories. Examples: sitemap/{store_code} or media/seo/{store_code}.</notice>
             </settings>
         </field>
     </fieldset>

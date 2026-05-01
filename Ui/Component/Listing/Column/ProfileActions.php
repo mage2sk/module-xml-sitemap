@@ -8,6 +8,7 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
+use Panth\XmlSitemap\Helper\PathResolver;
 
 class ProfileActions extends Column
 {
@@ -20,6 +21,7 @@ class ProfileActions extends Column
         UiComponentFactory $uiComponentFactory,
         private readonly UrlInterface $urlBuilder,
         private readonly StoreManagerInterface $storeManager,
+        private readonly PathResolver $pathResolver,
         array $components = [],
         array $data = []
     ) {
@@ -80,23 +82,18 @@ class ProfileActions extends Column
     private function getSitemapUrl(array $item): string
     {
         try {
-            $storeId = (int) ($item['store_id'] ?? 1);
-            if ($storeId === 0) {
-                $storeId = (int) $this->storeManager->getDefaultStoreView()?->getId() ?: 1;
+            $storeId = (int) ($item['store_id'] ?? 0);
+            // The form blocks store_id <= 0 from being saved, but legacy
+            // rows from before v1.0.9 could still have store_id = 0;
+            // fall back to the default store view so the link resolves.
+            if ($storeId <= 0) {
+                $storeId = (int) ($this->storeManager->getDefaultStoreView()?->getId() ?: 1);
             }
             $store     = $this->storeManager->getStore($storeId);
             $storeCode = (string) $store->getCode();
-            $baseUrl   = rtrim((string) $store->getBaseUrl(UrlInterface::URL_TYPE_WEB), '/');
-            $profileId = (int) ($item['profile_id'] ?? 0);
-
-            $outputPath = trim((string) ($item['output_path'] ?? ''));
-            if ($outputPath !== '') {
-                $relDir = rtrim(strtr($outputPath, ['{store_code}' => $storeCode]), '/');
-            } else {
-                $relDir = 'sitemap/' . $storeCode;
-            }
-
-            return $baseUrl . '/' . ltrim($relDir, '/') . '/sitemap_index.xml';
+            $baseUrl   = (string) $store->getBaseUrl(UrlInterface::URL_TYPE_WEB);
+            $relDir    = $this->pathResolver->resolveRelativeDir((string) ($item['output_path'] ?? ''), $storeCode);
+            return $this->pathResolver->buildSitemapUrl($baseUrl, $relDir);
         } catch (\Throwable) {
             return '';
         }
