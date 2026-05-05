@@ -27,7 +27,7 @@ class ProductFormSitemapPlugin
      */
     public function afterGetMeta(ProductDataProvider $subject, array $result): array
     {
-        if (!$this->sitemapConfig->isEnabled()) {
+        if (!$this->sitemapConfig->isSitemapEnabled()) {
             return $result;
         }
 

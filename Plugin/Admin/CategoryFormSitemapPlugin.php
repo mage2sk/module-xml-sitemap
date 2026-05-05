@@ -27,7 +27,7 @@ class CategoryFormSitemapPlugin
      */
     public function afterGetMeta(CategoryDataProvider $subject, array $result): array
     {
-        if (!$this->sitemapConfig->isEnabled()) {
+        if (!$this->sitemapConfig->isSitemapEnabled()) {
             return $result;
         }
 
