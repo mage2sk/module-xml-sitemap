@@ -2,9 +2,14 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/queue.xsd">
     <broker topic="panth_xml_sitemap.sitemap_shard" exchange="panth_xml_sitemap.exchange" type="db">
+        <!--
+            consumerInstance was set here too — same defect as in
+            queue_consumer.xml. Removed; consumer wiring lives in
+            queue_consumer.xml using the framework's default consumer
+            with our `handler` method.
+        -->
         <queue name="panth_xml_sitemap.sitemap_shard.q"
                consumer="panth_xml_sitemap.sitemap_shard.consumer"
-               consumerInstance="Panth\XmlSitemap\Model\Queue\ShardConsumer"
                handler="Panth\XmlSitemap\Model\Queue\ShardConsumer::process"/>
     </broker>
 </config>
