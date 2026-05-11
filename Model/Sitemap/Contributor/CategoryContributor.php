@@ -27,6 +27,7 @@ class CategoryContributor implements ContributorInterface
 
         $conn     = $this->resource->getConnection();
         $urlTable = $this->resource->getTableName('url_rewrite');
+        $catTable = $this->resource->getTableName('catalog_category_entity');
 
         $excludeNoindex = isset($config['exclude_noindex'])
             ? (bool) $config['exclude_noindex']
@@ -34,6 +35,11 @@ class CategoryContributor implements ContributorInterface
 
         $select = $conn->select()
             ->from(['ur' => $urlTable], ['request_path', 'entity_id'])
+            ->joinInner(
+                ['cce' => $catTable],
+                'cce.entity_id = ur.entity_id',
+                ['category_updated_at' => 'cce.updated_at']
+            )
             ->where('ur.entity_type = ?', 'category')
             ->where('ur.store_id = ?', $storeId)
             ->where('ur.redirect_type = ?', 0)
@@ -58,11 +64,24 @@ class CategoryContributor implements ContributorInterface
             if ($path === '') {
                 continue;
             }
-            yield [
+            $entry = [
                 'loc'        => $baseUrl . ltrim($path, '/'),
                 'changefreq' => $changefreq,
                 'priority'   => $priority,
             ];
+
+            // Per-row <lastmod> from catalog_category_entity.updated_at.
+            $updatedAt = (string) ($row['category_updated_at'] ?? '');
+            if ($updatedAt !== '') {
+                try {
+                    $entry['lastmod'] = (new \DateTimeImmutable($updatedAt))
+                        ->format('Y-m-d\TH:i:sP');
+                } catch (\Throwable) {
+                    // Skip lastmod rather than emit garbage.
+                }
+            }
+
+            yield $entry;
         }
     }
 }

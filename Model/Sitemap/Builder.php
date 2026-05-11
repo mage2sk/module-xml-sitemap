@@ -301,12 +301,9 @@ class Builder implements BuilderInterface
                     if (!empty($url['lastmod'])) {
                         $xml->writeElement('lastmod', (string) $url['lastmod']);
                     }
-                    if (!empty($url['changefreq'])) {
-                        $xml->writeElement('changefreq', (string) $url['changefreq']);
-                    }
-                    if (isset($url['priority'])) {
-                        $xml->writeElement('priority', number_format((float) $url['priority'], 1, '.', ''));
-                    }
+                    // <changefreq> and <priority> intentionally omitted — Google ignores
+                    // both fields and Bing treats them as soft hints. Matches the
+                    // shard writer behaviour for the on-disk variant.
                     if (!empty($url['images']) && is_array($url['images'])) {
                         foreach ($url['images'] as $img) {
                             if (!is_array($img) || empty($img['loc'])) {
@@ -376,12 +373,7 @@ class Builder implements BuilderInterface
                 $seenLocs[$loc] = true;
                 $xml->startElement('url');
                 $xml->writeElement('loc', $loc);
-                if (!empty($link['changefreq'])) {
-                    $xml->writeElement('changefreq', (string) $link['changefreq']);
-                }
-                if (isset($link['priority'])) {
-                    $xml->writeElement('priority', number_format((float) $link['priority'], 1, '.', ''));
-                }
+                // <changefreq>/<priority> intentionally omitted — see ShardWriter.
                 $xml->endElement();
             }
         }

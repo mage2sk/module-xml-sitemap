@@ -70,6 +70,7 @@ class ProductContributor implements ContributorInterface
 
         $stockTable    = $this->resource->getTableName('cataloginventory_stock_status');
         $resolvedTable = $this->resource->getTableName('panth_seo_resolved');
+        $entityTable   = $this->resource->getTableName('catalog_product_entity');
 
         // Profile config overrides store-level config
         $excludeOos     = isset($config['exclude_out_of_stock'])
@@ -87,9 +88,12 @@ class ProductContributor implements ContributorInterface
         $imageAttributeId = $includeImages ? $this->resolveImageAttributeId($imageSource) : 0;
         $mediaBaseUrl     = $includeImages ? $this->getMediaBaseUrl($store) : '';
 
-        $selects = 'ur.request_path, ur.metadata, ur.entity_id';
+        $selects = 'ur.request_path, ur.metadata, ur.entity_id, cpe.updated_at AS product_updated_at';
 
-        $joins = '';
+        $joins = sprintf(
+            ' INNER JOIN %s AS cpe ON cpe.entity_id = ur.entity_id',
+            $conn->quoteIdentifier($entityTable)
+        );
         $wheres = '';
 
         if ($excludeOos) {
@@ -156,6 +160,19 @@ class ProductContributor implements ContributorInterface
                     'changefreq' => $config['changefreq'] ?? 'weekly',
                     'priority'   => isset($config['priority']) ? (float) $config['priority'] : 0.8,
                 ];
+
+                // Per-row <lastmod> from catalog_product_entity.updated_at so
+                // crawlers can target only changed SKUs (Google's freshness
+                // scheduler needs distinct values to behave).
+                $updatedAt = (string) ($row['product_updated_at'] ?? '');
+                if ($updatedAt !== '') {
+                    try {
+                        $entry['lastmod'] = (new \DateTimeImmutable($updatedAt))
+                            ->format('Y-m-d\TH:i:sP');
+                    } catch (\Throwable) {
+                        // Skip lastmod rather than emit garbage.
+                    }
+                }
 
                 // Homepage optimisation: boost priority/changefreq for root or "home" path
                 if ($this->config->isSitemapHomepageOptimization($storeId) && $this->isHomepage($path)) {

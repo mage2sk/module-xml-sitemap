@@ -74,12 +74,10 @@ class ShardWriter
         if (!empty($url['lastmod'])) {
             $w->writeElement('lastmod', (string) $url['lastmod']);
         }
-        if (!empty($url['changefreq'])) {
-            $w->writeElement('changefreq', (string) $url['changefreq']);
-        }
-        if (isset($url['priority'])) {
-            $w->writeElement('priority', number_format((float) $url['priority'], 1, '.', ''));
-        }
+        // <changefreq> and <priority> intentionally omitted — Google ignores
+        // both fields when scheduling crawls (Mueller, GSC docs) and Bing
+        // treats them as soft hints. Keeping them inflated every shard by
+        // ~30–40% for zero ranking benefit.
         if (!empty($url['images']) && is_array($url['images'])) {
             foreach ($url['images'] as $img) {
                 if (!is_array($img) || empty($img['loc'])) {
