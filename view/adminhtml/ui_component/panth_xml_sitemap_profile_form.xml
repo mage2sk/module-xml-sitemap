@@ -422,6 +422,21 @@
                 </validation>
             </settings>
         </field>
+        <field name="excluded_cms_identifiers" formElement="textarea" sortOrder="40">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Excluded CMS Identifiers</label>
+                <dataScope>excluded_cms_identifiers</dataScope>
+                <notice translate="true">One identifier per line. Pages listed here are dropped from the CMS shard regardless of the NOINDEX setting. Default: home, enable-cookies, privacy-policy-cookie-restriction-mode, no-route.</notice>
+            </settings>
+            <formElements>
+                <textarea>
+                    <settings>
+                        <rows>6</rows>
+                    </settings>
+                </textarea>
+            </formElements>
+        </field>
     </fieldset>
 
     <!-- ========== Custom Links ========== -->

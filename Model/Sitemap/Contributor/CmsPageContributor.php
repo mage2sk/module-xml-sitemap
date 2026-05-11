@@ -36,11 +36,29 @@ class CmsPageContributor implements ContributorInterface
         $changefreq = $config['changefreq'] ?? 'monthly';
         $priority   = isset($config['priority']) ? (float) $config['priority'] : 0.5;
 
+        // Belt-and-braces over `exclude_noindex`. Profile column
+        // `excluded_cms_identifiers` is a newline-separated list of CMS page
+        // identifiers (e.g. `home`, `no-route`) that should never appear in
+        // the sitemap, regardless of whether the noindex join is on or
+        // whether panth_seo_resolved has caught up with cms_page changes.
+        $excluded = [];
+        if (!empty($config['excluded_cms_identifiers'])) {
+            $parts = preg_split('/\R|\s*,\s*/', (string) $config['excluded_cms_identifiers']) ?: [];
+            $excluded = array_values(array_filter(
+                array_map('trim', $parts),
+                static fn (string $s): bool => $s !== ''
+            ));
+        }
+
         $select = $conn->select()
             ->from(['p' => $page], ['identifier', 'update_time'])
             ->join(['ps' => $store2], 'ps.page_id = p.page_id', [])
             ->where('p.is_active = ?', 1)
             ->where('ps.store_id IN (?)', [0, $storeId]);
+
+        if (!empty($excluded)) {
+            $select->where('p.identifier NOT IN (?)', $excluded);
+        }
 
         if ($excludeNoindex) {
             $resolvedTable = $this->resource->getTableName('panth_seo_resolved');

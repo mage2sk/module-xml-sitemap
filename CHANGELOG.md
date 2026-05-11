@@ -4,6 +4,26 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.19] — 2026-05-11
+
+### Added
+
+- **Per-profile "Excluded CMS Identifiers" textarea** in the CMS Page
+  Settings fieldset. Newline-separated identifiers listed here are
+  dropped from the CMS shard regardless of the `exclude_noindex`
+  setting — belt-and-braces over the existing `panth_seo_resolved`
+  noindex join. New and upgraded installs seed the column with
+  `home`, `enable-cookies`, `privacy-policy-cookie-restriction-mode`,
+  `no-route` so the CMS shard is clean on day one without depending
+  on the noindex resolver having run yet.
+
+### Notes
+
+- Column added via declarative schema (`db_schema.xml`); seed runs
+  via the idempotent `SeedExcludedCmsIdentifiers` data patch (only
+  overwrites NULL/empty rows so merchant customisations survive
+  upgrade).
+
 ## [1.0.7] — 2026-04-21
 
 ### Added

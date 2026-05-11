@@ -18,6 +18,7 @@
             "priority_homepage": true,
             "exclude_out_of_stock": true,
             "exclude_noindex": true,
+            "excluded_cms_identifiers": true,
             "custom_links": true,
             "output_path": true,
             "last_generated_at": true,

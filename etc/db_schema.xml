@@ -26,6 +26,7 @@
         <column xsi:type="decimal" name="priority_homepage" scale="1" precision="2" nullable="false" default="1.0" comment="Homepage priority"/>
         <column xsi:type="boolean" name="exclude_out_of_stock" nullable="false" default="false" comment="Exclude out of stock products"/>
         <column xsi:type="boolean" name="exclude_noindex" nullable="false" default="true" comment="Exclude NOINDEX pages"/>
+        <column xsi:type="varchar" name="excluded_cms_identifiers" length="1024" nullable="true" comment="Newline-separated CMS page identifiers to skip from the sitemap"/>
         <column xsi:type="text" name="custom_links" nullable="true" comment="JSON array of custom URLs"/>
         <column xsi:type="varchar" name="output_path" length="512" nullable="false" default="sitemap/panth/{store_code}/" comment="Output path relative to pub"/>
         <column xsi:type="timestamp" name="last_generated_at" on_update="false" nullable="true" comment="Last generation timestamp"/>

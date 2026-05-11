@@ -230,12 +230,13 @@ class Builder implements BuilderInterface
             'dynamic_form' => 'dynamic_form',
         ];
         $profileConfig = $profile ? [
-            'exclude_out_of_stock'   => (bool) ($profile['exclude_out_of_stock'] ?? false),
-            'exclude_noindex'        => (bool) ($profile['exclude_noindex'] ?? false),
-            'include_images'         => (bool) ($profile['include_images'] ?? true),
-            'include_hreflang_tags'  => (bool) ($profile['include_hreflang_tags'] ?? true),
-            'include_video_sitemap'  => (bool) ($profile['include_video_sitemap'] ?? true),
-            'priority_homepage'      => isset($profile['priority_homepage'])
+            'exclude_out_of_stock'     => (bool) ($profile['exclude_out_of_stock'] ?? false),
+            'exclude_noindex'          => (bool) ($profile['exclude_noindex'] ?? false),
+            'excluded_cms_identifiers' => (string) ($profile['excluded_cms_identifiers'] ?? ''),
+            'include_images'           => (bool) ($profile['include_images'] ?? true),
+            'include_hreflang_tags'    => (bool) ($profile['include_hreflang_tags'] ?? true),
+            'include_video_sitemap'    => (bool) ($profile['include_video_sitemap'] ?? true),
+            'priority_homepage'        => isset($profile['priority_homepage'])
                 ? (float) $profile['priority_homepage']
                 : null,
         ] : [];
@@ -446,12 +447,13 @@ class Builder implements BuilderInterface
         // `priority_homepage` overrides the hard-coded 1.0 default in
         // ProductContributor::homepage-optimisation branch.
         $profileConfig = [
-            'exclude_out_of_stock'   => (bool) ($profile['exclude_out_of_stock'] ?? false),
-            'exclude_noindex'        => (bool) ($profile['exclude_noindex'] ?? false),
-            'include_images'         => (bool) ($profile['include_images'] ?? true),
-            'include_hreflang_tags'  => (bool) ($profile['include_hreflang_tags'] ?? true),
-            'include_video_sitemap'  => (bool) ($profile['include_video_sitemap'] ?? true),
-            'priority_homepage'      => isset($profile['priority_homepage'])
+            'exclude_out_of_stock'     => (bool) ($profile['exclude_out_of_stock'] ?? false),
+            'exclude_noindex'          => (bool) ($profile['exclude_noindex'] ?? false),
+            'excluded_cms_identifiers' => (string) ($profile['excluded_cms_identifiers'] ?? ''),
+            'include_images'           => (bool) ($profile['include_images'] ?? true),
+            'include_hreflang_tags'    => (bool) ($profile['include_hreflang_tags'] ?? true),
+            'include_video_sitemap'    => (bool) ($profile['include_video_sitemap'] ?? true),
+            'priority_homepage'        => isset($profile['priority_homepage'])
                 ? (float) $profile['priority_homepage']
                 : null,
         ];
