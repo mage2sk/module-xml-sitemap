@@ -4,6 +4,36 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.20] — 2026-05-13
+
+### Fixed
+
+- **Disabled / not-visible / unassigned products no longer leak into
+  the sitemap.** `url_rewrite` rows survive after a product is
+  disabled, flipped to "Not Visible Individually" or removed from a
+  website, so leaning on the rewrite table alone was emitting URLs
+  Magento would 404 (or that should never have been indexable in the
+  first place). `ProductContributor` and `ImageContributor` now
+  mirror the native sitemap query: enabled status (store-scoped with
+  admin fallback), visibility in catalog/both (2, 4), and an active
+  `catalog_product_website` row for the store's website.
+- **Inactive categories no longer appear.** `CategoryContributor`
+  now joins `catalog_category_entity_int.is_active` (store-scoped
+  with admin fallback) and restricts to the active store's root
+  category subtree, so categories disabled in admin disappear from
+  the next generated sitemap.
+- **CMS homepage and duplicate CMS rows.** `CmsPageContributor`
+  now drops the page configured as `web/default/cms_home_page`
+  (it already resolves to `/`) and groups by `page_id` so a CMS page
+  assigned to both "All Store Views" and a specific store no longer
+  duplicates its URL.
+
+### Notes
+
+- URL suffix (`catalog/seo/product_url_suffix`,
+  `catalog/seo/category_url_suffix`) continues to be honoured via
+  `url_rewrite.request_path` — there is no second source of truth.
+
 ## [1.0.19] — 2026-05-11
 
 ### Added

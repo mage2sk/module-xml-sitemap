@@ -5,6 +5,8 @@ namespace Panth\XmlSitemap\Model\Sitemap\Contributor;
 
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
+use Magento\Catalog\Model\Product\Visibility as ProductVisibility;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
@@ -85,6 +87,15 @@ class ImageContributor implements ContributorInterface
         $collection->setStoreId($storeId)
             ->addAttributeToSelect(['name', 'image'])
             ->addFieldToFilter('entity_id', ['in' => $ids])
+            // url_rewrite outlives status / visibility / website unassignment,
+            // so the same filters the native sitemap applies need to apply
+            // here too — otherwise disabled or de-listed products leak in.
+            ->addAttributeToFilter('status', ProductStatus::STATUS_ENABLED)
+            ->setVisibility([
+                ProductVisibility::VISIBILITY_IN_CATALOG,
+                ProductVisibility::VISIBILITY_BOTH,
+            ])
+            ->addWebsiteFilter((int) $this->storeManager->getStore($storeId)->getWebsiteId())
             ->addMediaGalleryData();
 
         /** @var Product $product */

@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Panth\XmlSitemap\Model\Sitemap\Contributor;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 
@@ -11,7 +13,8 @@ class CmsPageContributor implements ContributorInterface
 {
     public function __construct(
         private readonly ResourceConnection $resource,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly ScopeConfigInterface $scopeConfig
     ) {
     }
 
@@ -50,11 +53,15 @@ class CmsPageContributor implements ContributorInterface
             ));
         }
 
+        // GROUP BY page_id because cms_page_store can hold both "All Store
+        // Views" (store_id=0) and a specific store row for the same page,
+        // which would otherwise emit duplicate <url> entries.
         $select = $conn->select()
             ->from(['p' => $page], ['identifier', 'update_time'])
             ->join(['ps' => $store2], 'ps.page_id = p.page_id', [])
             ->where('p.is_active = ?', 1)
-            ->where('ps.store_id IN (?)', [0, $storeId]);
+            ->where('ps.store_id IN (?)', [0, $storeId])
+            ->group('p.page_id');
 
         if (!empty($excluded)) {
             $select->where('p.identifier NOT IN (?)', $excluded);
@@ -70,10 +77,21 @@ class CmsPageContributor implements ContributorInterface
             $select->where('seo.robots IS NULL OR seo.robots NOT LIKE ?', '%noindex%');
         }
 
+        // The configured home page resolves to "/" — emitting it under its
+        // CMS identifier would duplicate the homepage URL in the sitemap.
+        $homeIdentifier = (string) $this->scopeConfig->getValue(
+            'web/default/cms_home_page',
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
         $stmt = $conn->query($select);
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $ident = (string) ($row['identifier'] ?? '');
             if ($ident === '' || $ident === 'no-route') {
+                continue;
+            }
+            if ($homeIdentifier !== '' && $ident === $homeIdentifier) {
                 continue;
             }
             $lastmod = null;

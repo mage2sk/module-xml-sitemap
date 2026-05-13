@@ -80,8 +80,8 @@ class PathResolver
      *
      * Example:
      *
-     *     normaliseUrl('https://radheeimitation.com//sitemap-products-1.xml')
-     *         === 'https://radheeimitation.com/sitemap-products-1.xml'
+     *     normaliseUrl('https://example.com//sitemap-products-1.xml')
+     *         === 'https://example.com/sitemap-products-1.xml'
      */
     public function normaliseUrl(string $url): string
     {

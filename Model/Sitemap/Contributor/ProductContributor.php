@@ -22,6 +22,9 @@ class ProductContributor implements ContributorInterface
     /** @var array<string, int>|null Lazy-loaded attribute-code => attribute_id map */
     private ?array $imageAttributeIds = null;
 
+    /** @var array<string, int> Memoised non-image attribute_id lookups for catalog_product. */
+    private array $productAttributeIds = [];
+
     public function __construct(
         private readonly ResourceConnection $resource,
         private readonly StoreManagerInterface $storeManager,
@@ -71,6 +74,8 @@ class ProductContributor implements ContributorInterface
         $stockTable    = $this->resource->getTableName('cataloginventory_stock_status');
         $resolvedTable = $this->resource->getTableName('panth_seo_resolved');
         $entityTable   = $this->resource->getTableName('catalog_product_entity');
+        $websiteTable  = $this->resource->getTableName('catalog_product_website');
+        $intTable      = $this->resource->getTableName('catalog_product_entity_int');
 
         // Profile config overrides store-level config
         $excludeOos     = isset($config['exclude_out_of_stock'])
@@ -88,13 +93,65 @@ class ProductContributor implements ContributorInterface
         $imageAttributeId = $includeImages ? $this->resolveImageAttributeId($imageSource) : 0;
         $mediaBaseUrl     = $includeImages ? $this->getMediaBaseUrl($store) : '';
 
+        // url_rewrite rows survive after a product is disabled, unassigned from
+        // its website, or flipped to "Not Visible Individually" — so leaning on
+        // url_rewrite alone would leak those products into the sitemap. Mirror
+        // Magento's native sitemap query: require an enabled-for-this-store
+        // status, a catalog/both visibility, and a website assignment.
+        $websiteId    = (int) $store->getWebsiteId();
+        $statusAttrId = $this->resolveProductAttributeId('status');
+        $visAttrId    = $this->resolveProductAttributeId('visibility');
+
         $selects = 'ur.request_path, ur.metadata, ur.entity_id, cpe.updated_at AS product_updated_at';
 
         $joins = sprintf(
             ' INNER JOIN %s AS cpe ON cpe.entity_id = ur.entity_id',
             $conn->quoteIdentifier($entityTable)
         );
+        $joins .= sprintf(
+            ' INNER JOIN %s AS pw ON pw.product_id = ur.entity_id AND pw.website_id = %d',
+            $conn->quoteIdentifier($websiteTable),
+            $websiteId
+        );
         $wheres = '';
+
+        if ($statusAttrId > 0) {
+            // Store-scoped value falls back to admin (store_id=0) when no
+            // per-store override exists. COALESCE keeps this index-friendly.
+            $joins .= sprintf(
+                ' LEFT JOIN %1$s AS status_admin'
+                . ' ON status_admin.entity_id = ur.entity_id'
+                . ' AND status_admin.attribute_id = %2$d'
+                . ' AND status_admin.store_id = 0'
+                . ' LEFT JOIN %1$s AS status_store'
+                . ' ON status_store.entity_id = ur.entity_id'
+                . ' AND status_store.attribute_id = %2$d'
+                . ' AND status_store.store_id = %3$d',
+                $conn->quoteIdentifier($intTable),
+                $statusAttrId,
+                $storeId
+            );
+            $wheres .= ' AND COALESCE(status_store.value, status_admin.value) = 1';
+        }
+
+        if ($visAttrId > 0) {
+            $joins .= sprintf(
+                ' LEFT JOIN %1$s AS vis_admin'
+                . ' ON vis_admin.entity_id = ur.entity_id'
+                . ' AND vis_admin.attribute_id = %2$d'
+                . ' AND vis_admin.store_id = 0'
+                . ' LEFT JOIN %1$s AS vis_store'
+                . ' ON vis_store.entity_id = ur.entity_id'
+                . ' AND vis_store.attribute_id = %2$d'
+                . ' AND vis_store.store_id = %3$d',
+                $conn->quoteIdentifier($intTable),
+                $visAttrId,
+                $storeId
+            );
+            // 2 = Catalog, 4 = Catalog & Search. "Search only" (3) and
+            // "Not Visible Individually" (1) are correctly excluded.
+            $wheres .= ' AND COALESCE(vis_store.value, vis_admin.value) IN (2, 4)';
+        }
 
         if ($excludeOos) {
             $joins .= sprintf(
@@ -261,6 +318,31 @@ class ProductContributor implements ContributorInterface
     {
         $baseMediaUrl = rtrim((string) $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA), '/');
         return $baseMediaUrl . '/catalog/product';
+    }
+
+    /**
+     * Resolve a catalog_product EAV attribute_id by code, memoised per request.
+     * Returns 0 when the attribute is missing (defensive — never happens on a
+     * healthy install but keeps the JOIN block guarded).
+     */
+    private function resolveProductAttributeId(string $code): int
+    {
+        if (array_key_exists($code, $this->productAttributeIds)) {
+            return $this->productAttributeIds[$code];
+        }
+        $conn = $this->resource->getConnection();
+        $eavTable = $this->resource->getTableName('eav_attribute');
+        $entityTypeTable = $this->resource->getTableName('eav_entity_type');
+        $sql = sprintf(
+            'SELECT ea.attribute_id FROM %s AS ea'
+            . ' INNER JOIN %s AS et ON et.entity_type_id = ea.entity_type_id'
+            . ' WHERE et.entity_type_code = %s AND ea.attribute_code = %s LIMIT 1',
+            $conn->quoteIdentifier($eavTable),
+            $conn->quoteIdentifier($entityTypeTable),
+            $conn->quote('catalog_product'),
+            $conn->quote($code)
+        );
+        return $this->productAttributeIds[$code] = (int) $conn->fetchOne($sql);
     }
 
     /**
