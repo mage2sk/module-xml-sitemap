@@ -4,6 +4,38 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.21] — 2026-05-13
+
+### Fixed
+
+- **`setup:di:compile` no longer crashes when `module-hreflang` or
+  `module-advanced-seo` aren't installed.** `HreflangContributor`
+  previously imported `Panth\Hreflang\Api\HreflangResolverInterface`
+  and `Panth\AdvancedSEO\Helper\Config` directly as required
+  constructor types, but neither sibling module is listed in this
+  package's `require`. On a project that installs only
+  `mage2kishan/module-xml-sitemap`, Magento DI compile failed with
+  `Class "Panth\Hreflang\Api\HreflangResolverInterface" does not
+  exist` and every `bin/magento` command crashed thereafter.
+
+### Changed
+
+- New local interface `Panth\XmlSitemap\Api\HreflangResolverInterface`
+  (`getAlternates(string $entityType, int $entityId, int $storeId): array`)
+  decouples the contributor from the hreflang module.
+- New default binding
+  `Panth\XmlSitemap\Model\Hreflang\NullHreflangResolver` returns an
+  empty alternate set, registered as the `<preference>` for the new
+  interface so DI compile resolves cleanly out of the box. Projects
+  that want real hreflang output declare their own `<preference>`
+  pointing at an adapter over the installed hreflang resolver.
+- `HreflangContributor` no longer requires `AdvancedSeoConfig`. The
+  existing `panth_xml_sitemap.include_hreflang` store flag already
+  guards the contributor; the redundant
+  `Panth_AdvancedSEO::isHreflangEnabled()` check was a duplicate gate
+  and pulled in a sibling-module helper that doesn't have to be
+  present.
+
 ## [1.0.20] — 2026-05-13
 
 ### Fixed

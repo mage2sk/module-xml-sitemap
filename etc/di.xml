@@ -3,6 +3,12 @@
 
     <!-- Interface bindings -->
     <preference for="Panth\XmlSitemap\Api\BuilderInterface" type="Panth\XmlSitemap\Model\Sitemap\Builder"/>
+    <!-- HreflangContributor consumes this. Default null-binding keeps DI
+         compile working when mage2kishan/module-hreflang isn't installed.
+         Consumers who want real hreflang in their sitemap declare their
+         own <preference> overriding this with an adapter that delegates
+         to the installed hreflang resolver. -->
+    <preference for="Panth\XmlSitemap\Api\HreflangResolverInterface" type="Panth\XmlSitemap\Model\Hreflang\NullHreflangResolver"/>
 
     <!-- Sitemap contributors (DI list). Builder iterates these in declared order.
          Disable Product/Category contributors if enabling Image/Hreflang variants

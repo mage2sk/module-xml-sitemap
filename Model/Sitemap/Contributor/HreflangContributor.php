@@ -5,17 +5,23 @@ namespace Panth\XmlSitemap\Model\Sitemap\Contributor;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
-use Panth\Hreflang\Api\HreflangResolverInterface;
-use Panth\AdvancedSEO\Helper\Config as AdvancedSeoConfig;
 use Panth\XmlSitemap\Api\ContributorInterface;
+use Panth\XmlSitemap\Api\HreflangResolverInterface;
 use Panth\XmlSitemap\Helper\Config;
 
 /**
  * Streams product + category URLs with hreflang <xhtml:link> alternates.
- * Uses HreflangResolverInterface to look up the alternate set per entity.
+ * Uses the local {@see HreflangResolverInterface} to look up the alternate
+ * set per entity.
  *
- * NOTE: When enabled, disable Product/Category contributors to avoid
- * duplicate <url> entries (hreflang wraps the same locs).
+ * The default DI binding for that interface is
+ * {@see \Panth\XmlSitemap\Model\Hreflang\NullHreflangResolver}, which
+ * returns an empty array — so this contributor is a silent no-op unless
+ * the project declares a `<preference>` swapping in an adapter that
+ * delegates to mage2kishan/module-hreflang (or another resolver).
+ *
+ * NOTE: When wired up, disable Product/Category contributors to avoid
+ * duplicate <url> entries — hreflang wraps the same locs.
  */
 class HreflangContributor implements ContributorInterface
 {
@@ -23,8 +29,7 @@ class HreflangContributor implements ContributorInterface
         private readonly ResourceConnection $resource,
         private readonly StoreManagerInterface $storeManager,
         private readonly HreflangResolverInterface $hreflangResolver,
-        private readonly Config $config,
-        private readonly AdvancedSeoConfig $advancedSeoConfig
+        private readonly Config $config
     ) {
     }
 
@@ -35,7 +40,7 @@ class HreflangContributor implements ContributorInterface
 
     public function getUrls(int $storeId, array $config = []): \Generator
     {
-        if (!$this->config->sitemapIncludeHreflang($storeId) || !$this->advancedSeoConfig->isHreflangEnabled($storeId)) {
+        if (!$this->config->sitemapIncludeHreflang($storeId)) {
             return;
         }
         $store   = $this->storeManager->getStore($storeId);
@@ -60,6 +65,12 @@ class HreflangContributor implements ContributorInterface
                     continue;
                 }
                 $alts = $this->hreflangResolver->getAlternates($type, $id, $storeId);
+                if ($alts === []) {
+                    // No alternates resolved => nothing to add over what
+                    // Product/Category contributors already emit. Skip
+                    // to avoid duplicate <url> rows.
+                    continue;
+                }
                 $hreflang = [];
                 foreach ($alts as $alt) {
                     $locale = (string) ($alt['locale'] ?? '');
