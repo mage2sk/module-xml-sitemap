@@ -62,7 +62,7 @@ class ProfileFormDataProvider extends AbstractDataProvider
                 'priority_homepage' => '1.0',
                 'exclude_out_of_stock' => '0',
                 'exclude_noindex' => '1',
-                'output_path' => 'sitemap/panth/{store_code}/',
+                'output_path' => 'xmlsitemap/{store_code}/',
                 'cron_enabled' => '0',
                 'cron_schedule' => '0 2 * * *',
             ];

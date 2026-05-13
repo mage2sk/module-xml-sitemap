@@ -76,7 +76,7 @@ class Save extends AbstractAction implements HttpPostActionInterface
             'exclude_out_of_stock' => (int)($data['exclude_out_of_stock'] ?? 0),
             'exclude_noindex' => (int)($data['exclude_noindex'] ?? 1),
             'custom_links' => (string)($data['custom_links'] ?? ''),
-            'output_path' => (string)($data['output_path'] ?? 'sitemap/panth/{store_code}/'),
+            'output_path' => (string)($data['output_path'] ?? 'xmlsitemap/{store_code}/'),
             'is_active' => (int)($data['is_active'] ?? 1),
             'cron_enabled' => (int)($data['cron_enabled'] ?? 0),
             'cron_schedule' => (string)($data['cron_schedule'] ?? '0 2 * * *'),

@@ -13,9 +13,9 @@ namespace Panth\XmlSitemap\Helper;
  * and {@see \Panth\XmlSitemap\Ui\Component\Listing\Column\ProfileActions}.
  * Two of those forks left subtle gaps:
  *
- *   - Empty `output_path` defaulted to `sitemap/<store_code>` rather than
- *     writing the index to pub/ root, so a merchant who wanted
- *     `/sitemap_index.xml` got `/sitemap/<code>/sitemap_index.xml`.
+ *   - Empty `output_path` defaulted to `xmlsitemap/<store_code>` rather
+ *     than writing the index to pub/ root, so a merchant who wanted
+ *     `/sitemap_index.xml` got `/xmlsitemap/<code>/sitemap_index.xml`.
  *   - When the path normalisation produced an empty relative dir (the
  *     admin set `/`, or `{store_code}/` resolved to nothing), the URL
  *     concatenation produced a `//sitemap_index.xml` double-slash.

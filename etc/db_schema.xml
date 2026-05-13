@@ -28,7 +28,7 @@
         <column xsi:type="boolean" name="exclude_noindex" nullable="false" default="true" comment="Exclude NOINDEX pages"/>
         <column xsi:type="varchar" name="excluded_cms_identifiers" length="1024" nullable="true" comment="Newline-separated CMS page identifiers to skip from the sitemap"/>
         <column xsi:type="text" name="custom_links" nullable="true" comment="JSON array of custom URLs"/>
-        <column xsi:type="varchar" name="output_path" length="512" nullable="false" default="sitemap/panth/{store_code}/" comment="Output path relative to pub"/>
+        <column xsi:type="varchar" name="output_path" length="512" nullable="false" default="xmlsitemap/{store_code}/" comment="Output path relative to pub (kept distinct from /sitemap so it never shadows another module's frontend route)"/>
         <column xsi:type="timestamp" name="last_generated_at" on_update="false" nullable="true" comment="Last generation timestamp"/>
         <column xsi:type="int" name="generation_time" unsigned="true" nullable="true" comment="Last generation time in seconds"/>
         <column xsi:type="int" name="url_count" unsigned="true" nullable="false" default="0" comment="Total URL count"/>

@@ -18,7 +18,9 @@ use Psr\Log\LoggerInterface;
  * Streaming sitemap builder. Iterates contributors, writes shards at
  * shard_size boundary, emits sitemap_index.xml. Never buffers full lists.
  *
- * Output directory: pub/sitemap/<store_code>/
+ * Output directory: pub/xmlsitemap/<store_code>/ (kept distinct from
+ * pub/sitemap so an autoindex-off nginx never 403s another module's
+ * /sitemap route by serving this directory).
  *
  * When `panth_xml_sitemap/generation/xsl_enabled` is active, writes a human-readable XSL
  * stylesheet next to the shard files and references it via an
@@ -71,7 +73,10 @@ class Builder implements BuilderInterface
         $baseUrl   = rtrim((string) $store->getBaseUrl(), '/');
 
         $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
-        $relDir = 'sitemap/' . $storeCode;
+        // Distinct prefix so we never create pub/sitemap/, which would
+        // be served as a directory by nginx and 403 the bare /sitemap
+        // URL that the HTML sitemap router owns.
+        $relDir = 'xmlsitemap/' . $storeCode;
         $pub->create($relDir);
         $absDir = $pub->getAbsolutePath($relDir);
 
@@ -120,7 +125,7 @@ class Builder implements BuilderInterface
         };
 
         $pathResolver = $this->pathResolver;
-        $relDirForLegacy = 'sitemap/' . trim($storeCode, '/');
+        $relDirForLegacy = 'xmlsitemap/' . trim($storeCode, '/');
         $closeShard = function () use (&$shard, &$shards, &$files, $baseUrl, $relDirForLegacy, $now, $pathResolver): void {
             if ($shard === null) {
                 return;
@@ -252,7 +257,7 @@ class Builder implements BuilderInterface
         if ($xslEnabled) {
             $xslUrl = $this->pathResolver->buildSitemapUrl(
                 $baseUrl,
-                'sitemap/' . trim((string) $store->getCode(), '/'),
+                'xmlsitemap/' . trim((string) $store->getCode(), '/'),
                 self::XSL_FILENAME
             );
             $xml->writePi(

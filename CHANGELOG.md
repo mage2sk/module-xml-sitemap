@@ -4,6 +4,36 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.22] — 2026-05-13
+
+### Fixed
+
+- **Default profile output_path no longer shadows the `/sitemap` URL
+  another module owns.** The previous default — `sitemap/<store_code>`
+  (and `sitemap/panth/<store_code>/` in the legacy non-profile build
+  path) — created a real `pub/sitemap/` directory. Under the standard
+  Magento nginx config (`location / { try_files $uri $uri/ /index.php$is_args$args; }`)
+  nginx prefers the directory match over the index.php fallback, so
+  a bare `/sitemap` request lands on `pub/sitemap/` and returns
+  `403 Forbidden` (autoindex is typically off) — the request never
+  reaches Magento, so any frontend router that owned `/sitemap`
+  (for example an HTML sitemap landing page) is shadowed.
+
+### Changed
+
+- New default output_path is `xmlsitemap/<store_code>/`, applied
+  consistently across:
+  - `etc/db_schema.xml` — `output_path` column default
+  - `Model/Profile.php` — `getOutputPath()` fallback
+  - `Controller/Adminhtml/Profile/Save.php` — empty-input fallback
+  - `Ui/Component/Form/DataProvider/ProfileFormDataProvider.php`
+    — UI placeholder for new-profile creation
+  - `Model/Sitemap/Builder.php` — legacy non-profile generator
+- Existing profiles with a custom `output_path` keep their configured
+  value untouched. Profiles still on the old default that want to
+  reclaim `/sitemap` should re-save the profile (the new default
+  fills in) or manually move their `output_path` to `xmlsitemap/{store_code}/`.
+
 ## [1.0.21] — 2026-05-13
 
 ### Fixed

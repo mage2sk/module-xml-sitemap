@@ -53,7 +53,7 @@ class Profile extends AbstractModel
 
     public function getOutputPath(): string
     {
-        return (string) ($this->getData('output_path') ?? 'sitemap/panth/{store_code}/');
+        return (string) ($this->getData('output_path') ?? 'xmlsitemap/{store_code}/');
     }
 
     public function getMaxUrlsPerFile(): int
