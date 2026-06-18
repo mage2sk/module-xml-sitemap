@@ -1,29 +1,52 @@
 <!-- SEO Meta -->
 <!--
-  Title: Panth XML Sitemap — Sharded XML Sitemap, Hreflang, Image & Video Tags for Magento 2 (Hyva + Luma)
-  Description: Sharded, auto-splitting XML sitemap generator for Magento 2. Per-store profile CRUD, product / category / CMS / landing-page / blog / video / image / additional-link contributors, hreflang tags, image + video tags, configurable split threshold, gzip compression, XSL stylesheet, Google / Bing search-engine ping, delta tracking so only changed entities regenerate, async AMQP shard queue, cron scheduling, and a CLI generator. Frontend endpoint /panth-sitemap.xml served by the module controller via url_rewrite. Hyva and Luma compatible. Extracted from Panth_AdvancedSEO for standalone installation.
-  Keywords: magento 2 xml sitemap, magento 2 sitemap index, magento sharded sitemap, magento hreflang sitemap, magento image sitemap, magento video sitemap, magento sitemap gzip, magento sitemap ping, magento sitemap cron, magento sitemap cli, magento sitemap queue, magento delta sitemap, hyva xml sitemap, luma xml sitemap, panth xml sitemap
+  Title: Magento 2 XML Sitemap Extension with Sharding, Hreflang, Image & Video Tags | Hyva + Luma | Panth Infotech
+  Description: Panth XML Sitemap replaces the native Magento 2 sitemap pipeline with a sharded, delta-tracked generator. Per-store profiles, seven entity contributors (product, category, CMS, blog, landing page, video, additional links), hreflang alternate tags, image and video sitemap tags, auto-split at a configurable threshold, gzip compression, XSL stylesheet, Google and Bing ping on write, async AMQP shard queue, cron scheduling, and a CLI generator. Hyva and Luma compatible.
+  Keywords: magento 2 xml sitemap, magento 2 sitemap extension, magento sharded sitemap, magento hreflang sitemap, magento image sitemap, magento video sitemap, magento sitemap gzip, magento sitemap ping, magento sitemap cron, magento sitemap cli, magento sitemap generator, magento delta sitemap, hyva xml sitemap, luma xml sitemap, panth xml sitemap
   Author: Kishan Savaliya (Panth Infotech)
+  Canonical: https://kishansavaliya.com/magento-2-xml-sitemap.html
 -->
 
-# Panth XML Sitemap — Sharded XML Sitemap, Hreflang, Image & Video Tags for Magento 2 (Hyva + Luma)
+# Magento 2 XML Sitemap Extension: Sharding, Hreflang, Image & Video Tags (Hyva + Luma)
 
 [![Magento 2.4.4 - 2.4.8](https://img.shields.io/badge/Magento-2.4.4%20--%202.4.8-orange?logo=magento&logoColor=white)](https://magento.com)
 [![PHP 8.1 - 8.4](https://img.shields.io/badge/PHP-8.1%20--%208.4-blue?logo=php&logoColor=white)](https://php.net)
-[![Hyva Compatible](https://img.shields.io/badge/Hyva-Compatible-14b8a6?logo=alpinedotjs&logoColor=white)](https://hyva.io)
-[![Luma Compatible](https://img.shields.io/badge/Luma-Compatible-orange)]()
+[![Hyva + Luma](https://img.shields.io/badge/Themes-Hyva%20%2B%20Luma-14b8a6)](https://www.hyva.io)
+[![Live Demo & Details](https://img.shields.io/badge/Live%20Demo%20%26%20Details-magento--2--xml--sitemap-0D9488?style=flat)](https://kishansavaliya.com/magento-2-xml-sitemap.html)
 [![Packagist](https://img.shields.io/badge/Packagist-mage2kishan%2Fmodule--xml--sitemap-orange?logo=packagist&logoColor=white)](https://packagist.org/packages/mage2kishan/module-xml-sitemap)
 [![Upwork Top Rated Plus](https://img.shields.io/badge/Upwork-Top%20Rated%20Plus-14a800?logo=upwork&logoColor=white)](https://www.upwork.com/freelancers/~016dd1767321100e21)
 [![Website](https://img.shields.io/badge/Website-kishansavaliya.com-0D9488)](https://kishansavaliya.com)
-[![Get a Quote](https://img.shields.io/badge/Get%20a%20Quote-Free%20Estimate-DC2626)](https://kishansavaliya.com/get-quote)
 
-> **A complete XML sitemap replacement for Magento 2.** One module runs the full pipeline — per-store sitemap profiles, seven entity-type contributors (product, category, CMS, landing page, blog, video, additional links), hreflang alternate tags, image tags, video tags, auto-split at a configurable URL threshold, gzip compression, an admin-toggleable XSL stylesheet, Google / Bing ping on write, a delta tracker so only changed entities regenerate, an async AMQP shard queue, a nightly cron, and a CLI generator. The final `/panth-sitemap.xml` is served by the module's frontend controller via `url_rewrite`, so the request never touches the legacy core `Magento_Sitemap` router. Works identically on **Hyva** and **Luma**.
+> **A complete XML sitemap replacement for Magento 2.** Panth XML Sitemap adds per-store sitemap profiles, seven entity contributors, hreflang alternate tags, image and video tags, automatic shard splitting, gzip compression, search-engine ping, delta tracking, an async queue, a daily cron, and a CLI command. Works identically on **Hyva** and **Luma**.
 
-Magento's native XML sitemap is a single blob written to disk by a cron job that re-crawls every product in the catalog on every run. There is no hreflang handling, no incremental regeneration, no sharding (so once you cross Google's 50,000-URL / 50 MB-uncompressed-per-file limit you silently drop URLs), no async work queue, no CMS-block-aware contributors, and no ping-on-write. **Panth XML Sitemap** replaces that pipeline with a sharded, delta-tracked, queue-backed generator that writes hreflang / image / video tags for every URL, splits shards automatically at the configured threshold, gzips them, pings search engines, and serves the final sitemap index through a Magento controller — so CDN rules, caching headers, and url_rewrite precedence all behave predictably.
+**Product page:** [kishansavaliya.com/magento-2-xml-sitemap.html](https://kishansavaliya.com/magento-2-xml-sitemap.html)
+
+---
+
+## Quick Answer
+
+**What is Panth XML Sitemap?** It is a Magento 2 sitemap extension that replaces the native single-blob sitemap pipeline with a sharded, delta-tracked generator that handles hreflang, images, video, gzip, and search-engine ping out of the box.
+
+**What does it add to my store?**
+
+- **Per-store sitemap profiles** so each store view can have its own contributor list, shard size, gzip setting, and cron schedule.
+- **Seven entity contributors**: product, category, CMS page, landing page, blog, video, and additional links.
+- **Hreflang alternate tags** for multi-language stores, added per URL inside each shard.
+- **Image and video sitemap tags** so Google Image Search and video results can index your media.
+- **Auto-sharding** that splits files at a configurable URL cap and closes early if a shard would exceed 45 MB.
+- **Delta tracking** so only changed entities regenerate on each cron run.
+- **Google and Bing ping** after every successful write.
+- **A CLI command** for CI pipelines and manual rebuilds.
+
+**Which themes are supported?** Both **Hyva** and **Luma**. The sitemap is a backend-only pipeline; there is no frontend JavaScript, so it works with any theme.
+
+**What does it need?** Magento 2.4.4 to 2.4.8, PHP 8.1 to 8.4, and the free `mage2kishan/module-core` package.
 
 ---
 
 ## Need Custom Magento 2 Development?
+
+> **Get a free quote for your project in 24 hours** for custom modules, Hyva themes, performance work, M1 to M2 migrations, and Adobe Commerce Cloud.
 
 <p align="center">
   <a href="https://kishansavaliya.com/get-quote">
@@ -40,238 +63,282 @@ Magento's native XML sitemap is a single blob written to disk by a cron job that
 
 [![Hire on Upwork](https://img.shields.io/badge/Hire%20on%20Upwork-Top%20Rated%20Plus-14a800?style=for-the-badge&logo=upwork&logoColor=white)](https://www.upwork.com/freelancers/~016dd1767321100e21)
 
+100% Job Success - 10+ Years Magento Experience
+Adobe Certified - Hyva Specialist
+
 </td>
 <td width="50%" align="center">
 
 ### Panth Infotech Agency
+**Magento Development Team**
 
 [![Visit Agency](https://img.shields.io/badge/Visit%20Agency-Panth%20Infotech-14a800?style=for-the-badge&logo=upwork&logoColor=white)](https://www.upwork.com/agencies/1881421506131960778/)
+
+Custom Modules - Theme Design - Migrations
+Performance - SEO - Adobe Commerce Cloud
 
 </td>
 </tr>
 </table>
 
+**Visit our website:** [kishansavaliya.com](https://kishansavaliya.com) &nbsp;|&nbsp; **Get a quote:** [kishansavaliya.com/get-quote](https://kishansavaliya.com/get-quote)
+
 ---
 
 ## Table of Contents
 
-- [Preview](#preview)
-- [Features](#features)
-- [How It Works](#how-it-works)
+- [Who Is It For](#who-is-it-for)
+- [Key Features](#key-features)
+- [Screenshots](#screenshots)
 - [Compatibility](#compatibility)
 - [Installation](#installation)
-- [Verify](#verify)
 - [Configuration](#configuration)
 - [Managing Sitemap Profiles](#managing-sitemap-profiles)
-- [Frontend Endpoint](#frontend-endpoint)
+- [How It Works](#how-it-works)
 - [CLI](#cli)
 - [Cron](#cron)
-- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
 - [Support](#support)
+- [About Panth Infotech](#about-panth-infotech)
+- [Quick Links](#quick-links)
 
 ---
 
-## Preview
+## Who Is It For
+
+- **Stores with large catalogs** where Google's 50,000 URL and 50 MB per-file limits mean the native sitemap silently drops URLs. Panth XML Sitemap splits into as many shards as needed.
+- **Multi-language stores** that need `hreflang` alternate links inside every sitemap entry so search engines serve the right language version to each audience.
+- **Stores with rich media** that want product images and videos indexed by Google Image and Video Search.
+- **Merchants who want fast nightly rebuilds** because the delta tracker skips shards whose source entities have not changed since the last run.
+- **Development teams** that need a CLI command to regenerate sitemaps in CI pipelines after deploys.
+
+---
+
+## Key Features
+
+### Per-Store Sitemap Profiles
+- **One profile per store view** with its own contributor list, shard size, gzip flag, hreflang flag, cron schedule, and active toggle.
+- **Profile grid in admin** at Admin - Panth Infotech - XML Sitemap - Sitemap Profiles with inline Edit, Generate Now, View Sitemap, and Delete actions.
+- **Mass actions**: Enable, Disable, Regenerate Now, and Delete for multiple profiles at once.
+- **Base URL override** so CDN domains or alternate apex hosts are handled correctly per store.
+
+### Seven Entity Contributors
+- **Product contributor** walks enabled, visible products, reads canonical URLs from `url_rewrite`, and emits `<lastmod>`, `<changefreq>`, and `<priority>` per URL.
+- **Category contributor** walks active categories at the store's root, respecting the store's root category.
+- **CMS page contributor** includes all active CMS pages, excluding the homepage, no-route, cookie notice, and any admin-configured extra identifiers.
+- **Landing page contributor** auto-enabled when Panth Landing Pages module is present; self-disables otherwise.
+- **Blog contributor** auto-detects supported third-party blog modules and self-disables when none are installed.
+- **Video contributor** emits `<video:video>` blocks for products with external video media gallery items.
+- **Additional links contributor** reads a free-form textarea of custom URLs (one per line) for campaign pages or any URL that does not live in a content table.
+
+### Hreflang, Image & Video Tags
+- **Hreflang alternate tags** add `<xhtml:link rel="alternate" hreflang="xx-YY">` entries per URL when the store has two or more locale codes, including `x-default`.
+- **Image tags** add `<image:image>` blocks with image URL, title, and caption for every gallery image on a product URL.
+- **Video tags** add `<video:video>` blocks (title, description, content URL, thumbnail, duration) for products with associated video media.
+- **Configurable image source**: choose base image, small image, or thumbnail for sitemap entries.
+
+### Auto-Sharding and Gzip
+- **Auto-split at a configurable URL cap** (default 45,000, well under Google's 50,000 hard limit). Shards are named `sitemap-1.xml`, `sitemap-2.xml`, and so on.
+- **Early close at 45 MB uncompressed** to stay under the 50 MB per-file cap.
+- **Gzip compression** writes shards as `.xml.gz` with `Content-Encoding: gzip`. A typical catalog compresses about 10:1, so a 45 MB shard ships as roughly 4.5 MB.
+- **XSL stylesheet** can be injected into every shard so the sitemap renders as a human-readable table in a browser while remaining a valid XML file for crawlers.
+
+### Search-Engine Ping and Delta Tracking
+- **Ping Google and Bing** after every successful write. Each engine can be enabled or disabled independently per profile.
+- **Delta tracker** records `last_generated_at` per entity in `panth_seo_sitemap_shard`. The next cron run skips shards whose source entities have not changed. Typical nightly time drops from 90 seconds to 5 seconds on a 50k-product store.
+- **Force flag** on the CLI bypasses the delta tracker for a full rebuild when needed.
+
+### Async Queue, Cron, and CLI
+- **Async AMQP shard queue** dispatches each shard to the `panth_xml_sitemap.shard` topic when enabled; a worker pool builds shards in parallel.
+- **Nightly cron** at `0 2 * * *` by default; each profile can override with its own cron expression.
+- **CLI command** `panth:seo:sitemap:generate` for manual and CI-driven runs, with `--profile-id` and `--force` flags.
+- **Frontend endpoint** `/panth-sitemap.xml` served by the module controller via a `url_rewrite` row installed at setup time.
+
+### Exclude Flags
+- **Exclude out-of-stock products** to avoid indexing unavailable items.
+- **Exclude NOINDEX pages** to keep the sitemap consistent with your robots meta directives.
+- **Per-profile excluded CMS identifiers** textarea to drop specific CMS pages from the CMS shard.
+
+---
+
+## Screenshots
 
 ### Live walkthrough
 
-End-to-end admin flow — open the XML Sitemap config, toggle a few fields, edit the default profile, flip entity types and per-type priorities, run Generate Now, and click View Sitemap. Click to play.
+End-to-end admin flow: open the XML Sitemap config, toggle fields, edit the default profile, flip entity types and priorities, run Generate Now, and click View Sitemap.
 
 ![Panth XML Sitemap demo](docs/images/demo.gif)
 
-### Admin
+### System configuration
 
-**System configuration** — **Stores → Configuration → Panth Extensions → XML Sitemap**. Six collapsible groups (General, Generation, Hreflang, Images & Video, Search Engine Ping, Additional Links) cover every global default.
+**Stores - Configuration - Panth Extensions - XML Sitemap** with six collapsible groups (General, Generation, Hreflang, Images & Video, Search Engine Ping, Additional Links).
 
 ![Admin configuration](docs/images/admin-config.png)
 
-**Sitemap Profiles grid** — one row per profile with columns for ID, Name, Store View (resolved from store_id), Entity Types (CSV of product/category/cms/custom), Active, URL Count, File Count, Last Generated, Cron flag, and per-row Edit / Generate Now / View Sitemap / Delete actions.
+### Sitemap Profiles grid
+
+One row per profile with columns for ID, Name, Store View, Entity Types, Active, URL Count, File Count, Last Generated, and per-row actions.
 
 ![Admin grid](docs/images/admin-grid.png)
 
-**Edit Sitemap Profile form** — eight collapsible sections: General, Entity Types (multi-select), Product Settings, Category Settings, CMS Page Settings, Custom Links, Advanced Settings (max URLs per file, video + hreflang xmlns toggles, output path with `{store_code}`), Scheduling, and read-only Generation Status populated after each run.
+### Edit Sitemap Profile form
+
+Eight collapsible sections covering every profile setting, with a read-only Generation Status block populated after each run.
 
 ![Edit profile form](docs/images/admin-edit.png)
 
-### Frontend
+### XSL rendered sitemap
 
-**`/sitemap/<store_code>/sitemap_index.xml`** — the XSL stylesheet renders a human-readable table view of the sitemap index in the browser while the underlying response stays a valid XML sitemap for crawlers.
+The XSL stylesheet renders a human-readable table in the browser while the response stays valid XML for crawlers.
 
 ![XSL rendered sitemap](docs/images/sitemap-xsl-preview.png)
 
 ---
 
-## Features
-
-| Feature | Description |
-|---|---|
-| **Per-store sitemap profile CRUD** | Every profile row in `panth_seo_sitemap_profile` is scoped to a single `store_id` and carries 17 independent knobs — base URL, max URLs per shard, gzip on/off, hreflang on/off, images on/off, videos on/off, auto-split threshold, XSL stylesheet path, ping targets, async queue flag, cron schedule, active flag, priority, and per-entity include flags. Two stores can have two completely different sitemap strategies. |
-| **Product contributor** | `Model\Sitemap\Contributor\Product` walks `catalog_product_entity` for visible + enabled SKUs at the target store scope, reads the canonical URL from `url_rewrite`, and emits one `<url>` per row. Each URL ships with `<lastmod>` pulled from `updated_at`, `<changefreq>` and `<priority>` from the profile defaults, an `<image:image>` block for every gallery image (when enabled), and a `<xhtml:link rel="alternate" hreflang="…">` row per alternate store_view (when enabled). |
-| **Category contributor** | `Contributor\Category` walks `catalog_category_entity` for `is_active = 1` at the target store scope, respecting the store root. Emits `<lastmod>`, `<changefreq>`, `<priority>` from profile defaults + hreflang alternates. |
-| **CMS page contributor** | `Contributor\CmsPage` pulls every active CMS page (`is_active = 1`) for the store, excludes `home`, `no-route`, `enable-cookies` + any admin-configured extra exclusions, and emits one `<url>` per identifier. |
-| **Landing page / Blog / Video contributors** | Optional contributors that plug into the same pipeline — `Contributor\LandingPage` for Panth Landing Page module rows, `Contributor\Blog` for popular third-party blog modules (auto-detected by class probe), `Contributor\Video` for product video associations. Each contributor self-disables if its source table / module is absent. |
-| **Additional links contributor** | `Contributor\AdditionalLinks` reads a free-form admin textarea (`URL | lastmod | changefreq | priority` — one per line) for landing pages, campaign URLs, or any one-off entry that doesn't live in a content entity table. |
-| **Hreflang** | `Contributor\HreflangContributor` computes alternate-language entries per URL by joining the store's default + secondary `store_view` rows and writing `<xhtml:link rel="alternate" hreflang="xx-YY" href="…"/>` blocks. Handles `x-default`. Controlled by the per-profile `enable_hreflang` flag. |
-| **Image tags** | When `enable_images = 1`, `Contributor\ImageContributor` walks `catalog_product_entity_media_gallery` for each product URL and emits one `<image:image><image:loc>` block per image with an optional `<image:title>` and `<image:caption>` pulled from the media row's `label`. |
-| **Video tags** | When `enable_videos = 1`, emits `<video:video>` blocks (title, description, content_loc, thumbnail_loc, duration) for product videos stored in `catalog_product_entity_media_gallery_value_video`. |
-| **Auto-split at threshold** | Each shard writer monitors the running URL count and closes the shard as soon as it reaches the profile's `max_urls_per_file` (default 45,000 — well below Google's 50,000 hard limit). The next URL opens a new shard with a sequential index (`sitemap-1.xml`, `sitemap-2.xml`, …). A separate uncompressed-size counter closes the shard early if it would exceed 45 MB, keeping it under the 50 MB-per-file cap. |
-| **Gzip compression** | When `enable_gzip = 1`, each shard is written through `gzopen()` + `gzwrite()` and served as `sitemap-N.xml.gz` with `Content-Encoding: gzip` — typical catalogs compress 10:1, so a 45 MB shard ships as ~4.5 MB. |
-| **XSL stylesheet** | Optional `<?xml-stylesheet type="text/xsl" href="<path>"?>` processing instruction can be injected at the top of every shard and the index so the sitemap renders as a human-readable table in a browser. Path is configurable per profile. |
-| **Search-engine ping** | `Model\Sitemap\SearchEnginePinger` POSTs to Google (`https://www.google.com/ping?sitemap=<url>`) and Bing (`https://www.bing.com/ping?sitemap=<url>`) after a successful write, using a cURL wrapper with a 5 s timeout and retry-once-on-5xx. Per-profile toggle — Google and Bing can be enabled independently. |
-| **Delta tracking** | `Model\Sitemap\DeltaTracker` records per-entity `last_generated_at` timestamps in `panth_seo_sitemap_shard` on every successful write. The next cron run consults the delta table and skips entire shards whose source entities haven't changed since the last write — typical nightly regeneration drops from 90 s to 5 s on a 50k-product store. |
-| **Async AMQP shard queue** | When `enable_queue = 1`, each shard is published to the `panth_xml_sitemap.shard` topic and consumed by `Queue\ShardConsumer`. The cron producer finishes in under a second; the consumer pool (typically 2–4 workers) grinds through shards in parallel. Zero overlap — the delta tracker acts as the distributed lock. |
-| **Cron scheduling** | `Cron\Rebuild` is wired to the default schedule `0 2 * * *` (02:00 daily). Per-profile override: each profile row has a `cron_schedule` column that takes a standard cron expression; the generator skips profiles whose row is inactive or whose schedule hasn't matched the current run window. |
-| **CLI generator** | `bin/magento panth:seo:sitemap:generate [--profile-id=N] [--force]` — generates a single profile (when `--profile-id` is provided) or every active profile. `--force` bypasses the delta tracker for a full rebuild. Progress is streamed to stdout so CI can log it. |
-
----
-
-## How It Works
-
-Six cooperating pieces:
-
-1. **`Controller\Sitemap\Index`** at route `xml_sitemap/sitemap/index` serves `GET /panth-sitemap.xml` with `Content-Type: application/xml; charset=utf-8`, streaming the generated sitemap index (or a single shard when the request path includes a shard identifier). The controller reads from the `pub/media/panth-sitemap/<store_code>/` directory where shards live, or from the `sitemap_index.xml` blob stored in `panth_seo_sitemap_shard` for the fast path.
-2. **`Setup\Patch\Data\InstallSitemapRewrite`** writes the `url_rewrite` row that maps `/panth-sitemap.xml` to `xml_sitemap/sitemap/index` at install time. `RefreshSitemapRewrite` re-points any stale `target_path` left behind by `Panth_AdvancedSEO` so upgrades are a no-op. `InstallSitemapTables` ensures `panth_seo_sitemap_profile` + `panth_seo_sitemap_shard` exist when upgrading from a pre-1.0 installation that didn't have them.
-3. **`Model\Sitemap\Builder`** (implements `Api\BuilderInterface`) is the orchestrator. Given a profile ID it (a) resolves the store scope, (b) iterates every registered contributor in deterministic order, (c) pipes each URL through `ShardWriter`, (d) closes each shard when the threshold is hit, (e) writes the top-level `sitemap_index.xml` via `IndexWriter`, (f) persists the run metadata via `DeltaTracker`, and (g) dispatches to `SearchEnginePinger` on success. Contributors are registered via `di.xml` in an ordered list so stores can disable one type without touching code.
-4. **`Queue\ShardConsumer`** (wired when `enable_queue = 1`) consumes the `panth_xml_sitemap.shard` AMQP topic. Each message is a single profile-id + contributor-name + shard-index tuple; the consumer rebuilds just that shard, writes it to disk (or gzipped to disk), updates the delta row, and ACKs. Failed shards retry with exponential backoff before landing on the dead-letter topic.
-5. **`Cron\Rebuild`** fires on the configured schedule (`0 2 * * *` by default). For every active profile whose cron window matches the current run, it either (a) dispatches shard-generation jobs to the queue when `enable_queue = 1`, or (b) synchronously calls `Builder::generate()` when the queue is off. Logs the run ID, profile ID, duration and URL count to `var/log/panth_xml_sitemap.log`.
-6. **`Console\GenerateCommand`** registers `panth:seo:sitemap:generate` in `etc/di.xml` under the Magento console command pool. Used for manual runs, CI pipelines that need a fresh sitemap after a deploy, and troubleshooting — the command emits progress lines per contributor so the operator sees exactly which contributor / store_view / shard is in flight.
-
----
-
 ## Compatibility
 
-| Requirement | Supported |
+| Requirement | Versions Supported |
 |---|---|
 | Magento Open Source | 2.4.4, 2.4.5, 2.4.6, 2.4.7, 2.4.8 |
-| Adobe Commerce | 2.4.4 — 2.4.8 |
-| PHP | 8.1, 8.2, 8.3, 8.4 |
-| Hyva Theme | 1.0+ (fully compatible) |
+| Adobe Commerce | 2.4.4, 2.4.5, 2.4.6, 2.4.7, 2.4.8 |
+| Adobe Commerce Cloud | 2.4.4 to 2.4.8 |
+| PHP | 8.1.x, 8.2.x, 8.3.x, 8.4.x |
+| Hyva Theme | 1.0+ (compatible; no frontend JS changes) |
 | Luma Theme | Native support |
-| Panth Core | ^1.0 (installed automatically) |
+| Required Dependency | `mage2kishan/module-core` (free) |
 
 ---
 
 ## Installation
+
+### Composer Installation (Recommended)
 
 ```bash
 composer require mage2kishan/module-xml-sitemap
 bin/magento module:enable Panth_Core Panth_XmlSitemap
 bin/magento setup:upgrade
 bin/magento setup:di:compile
+bin/magento setup:static-content:deploy -f
 bin/magento cache:flush
 ```
 
----
+### Manual Installation via ZIP
 
-## Verify
+1. Download the latest release from [Packagist](https://packagist.org/packages/mage2kishan/module-xml-sitemap) or from the [product page](https://kishansavaliya.com/magento-2-xml-sitemap.html).
+2. Extract it to `app/code/Panth/XmlSitemap/` in your Magento install.
+3. Make sure `Panth_Core` is installed too (required dependency).
+4. Run the commands above starting from `bin/magento module:enable`.
+
+### Verify Installation
 
 ```bash
 bin/magento module:status Panth_XmlSitemap
-# Module is enabled
-
-curl -s -o /dev/null -w '%{http_code}\n' https://your-store.test/panth-sitemap.xml
-# 200
-
-curl -sI https://your-store.test/panth-sitemap.xml | grep -i content-type
-# Content-Type: application/xml; charset=utf-8
-
-curl -s https://your-store.test/panth-sitemap.xml | head -5
-# <?xml version="1.0" encoding="UTF-8"?>
-# <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-#   <sitemap>
-#     <loc>https://your-store.test/panth-sitemap-products-1.xml</loc>
-#     <lastmod>2026-04-21T02:00:00+00:00</lastmod>
+# Expected: Module is enabled
 ```
 
-Visit **Admin → Panth Infotech → XML Sitemap → Sitemap Profiles** to see the seeded profile for each active store.
+After install, open:
+```
+Admin - Panth Infotech - XML Sitemap - Sitemap Profiles
+```
 
 ---
 
 ## Configuration
 
-Navigate to **Stores → Configuration → Panth Infotech → XML Sitemap**.
+Go to **Admin - Panth Infotech - XML Sitemap - Configuration** (or **Stores - Configuration - Panth Extensions - XML Sitemap**).
+
+Every setting resolves at store-view scope, so each store can have a different configuration.
 
 ### General
 
-| Setting | Path | Default | What it controls |
+| Setting | Group | Default | Description |
 |---|---|---|---|
-| **Enable Module** | `panth_xml_sitemap/general/enabled` | Yes | Master switch. When No, the frontend controller returns 404 and the cron is a no-op. |
-| **Debug Logging** | `panth_xml_sitemap/general/debug` | No | When Yes, every Builder run logs its run ID, profile ID, contributor list, URL count and duration to `var/log/panth_xml_sitemap.log`. |
-| **Default Max URLs per File** | `panth_xml_sitemap/general/max_urls_per_file` | 45000 | Per-shard soft cap (well below Google's 50k hard limit). Each profile can override. |
-| **Default Change Frequency** | `panth_xml_sitemap/general/default_changefreq` | `daily` | Emitted on every `<url>` that doesn't get a per-entity override. Allowed: `always`, `hourly`, `daily`, `weekly`, `monthly`, `yearly`, `never`. |
-| **Default Priority** | `panth_xml_sitemap/general/default_priority` | `0.5` | Emitted on every `<url>` that doesn't get a per-entity override. Range 0.0–1.0. |
+| Enabled | General | Yes | Master toggle. When No, the frontend controller returns 404 and the cron is a no-op. |
+| Homepage Optimization | General | Yes | Emits the homepage URL with priority 1.0 and daily change frequency. |
 
-### Features
+### Generation
 
-| Setting | Path | Default | What it controls |
+| Setting | Group | Default | Description |
 |---|---|---|---|
-| **Enable Hreflang Tags** | `panth_xml_sitemap/features/enable_hreflang` | Yes | Global default for new profiles. Each profile can override. When Yes, `<xhtml:link rel="alternate" hreflang="…">` entries are added per URL. |
-| **Enable Image Tags** | `panth_xml_sitemap/features/enable_images` | Yes | Global default for new profiles. When Yes, `<image:image>` blocks are added per product URL. |
-| **Enable Video Tags** | `panth_xml_sitemap/features/enable_videos` | No | Global default for new profiles. When Yes, `<video:video>` blocks are added per product URL that has associated videos. |
-| **Enable Gzip Compression** | `panth_xml_sitemap/features/enable_gzip` | Yes | Global default for new profiles. When Yes, shards are written as `.xml.gz` and served with `Content-Encoding: gzip`. |
-| **XSL Stylesheet Path** | `panth_xml_sitemap/features/xsl_path` | (empty) | Optional path (relative to `pub/`) injected as `<?xml-stylesheet type="text/xsl" href="<path>"?>` at the top of every shard. Leave empty to skip. |
+| URLs per Shard | Generation | 45000 | Maximum number of URLs per sitemap file before a new shard is opened. Range: 1000 to 50000. |
+| Gzip Output | Generation | Yes | Writes shards as `.xml.gz` with `Content-Encoding: gzip`. |
+| Enable XSL Stylesheet | Generation | No | Adds an `<?xml-stylesheet?>` processing instruction so the sitemap renders as a table in browsers. |
+| Exclude Out-of-Stock Products | Generation | No | Omits products with zero saleable quantity. |
+| Exclude NOINDEX Pages | Generation | No | Omits pages marked as noindex, keeping the sitemap consistent with robots directives. |
+
+### Hreflang
+
+| Setting | Group | Default | Description |
+|---|---|---|---|
+| Include Hreflang Alternates | Hreflang | Yes | Adds `<xhtml:link rel="alternate" hreflang="xx-YY">` entries per URL for multi-language stores. |
+
+### Images & Video
+
+| Setting | Group | Default | Description |
+|---|---|---|---|
+| Include Image Extension | Images & Video | Yes | Adds `<image:image>` blocks per product URL for Google Image Search indexing. |
+| Product Image Source for Sitemap | Images & Video | base_image | Which product image role to use in image sitemap entries (base image, small image, or thumbnail). |
+| Include Video Extension | Images & Video | No | Adds `<video:video>` blocks per product URL that has associated video media. |
 
 ### Search Engine Ping
 
-| Setting | Path | Default | What it controls |
+| Setting | Group | Default | Description |
 |---|---|---|---|
-| **Ping Google** | `panth_xml_sitemap/ping/enable_google` | Yes | Global default for new profiles. POSTs to `https://www.google.com/ping?sitemap=<url>` after a successful write. |
-| **Ping Bing** | `panth_xml_sitemap/ping/enable_bing` | Yes | Global default for new profiles. POSTs to `https://www.bing.com/ping?sitemap=<url>` after a successful write. |
+| Ping Google on Rebuild | Search Engine Ping | Yes | POSTs to Google's ping endpoint after each successful sitemap write. |
+| Ping Bing on Rebuild | Search Engine Ping | Yes | POSTs to Bing's ping endpoint after each successful sitemap write. |
 
-### Queue & Delta
+### Additional Links
 
-| Setting | Path | Default | What it controls |
+| Setting | Group | Default | Description |
 |---|---|---|---|
-| **Enable Async Queue** | `panth_xml_sitemap/queue/enable_queue` | No | Global default for new profiles. When Yes, each shard is dispatched to the `panth_xml_sitemap.shard` AMQP topic instead of being built synchronously. Requires a worker running `bin/magento queue:consumers:start panth_xml_sitemap_consumer`. |
-| **Enable Delta Tracking** | `panth_xml_sitemap/queue/enable_delta` | Yes | Global default for new profiles. When Yes, the generator consults `panth_seo_sitemap_shard.last_generated_at` and skips shards whose source entities haven't changed since the last run. |
-
-Every setting resolves at **store-view** scope, so each store can have a different URL cap, gzip flag, hreflang flag, ping policy, or queue flag.
+| Additional Links (one URL per line) | Additional Links | (empty) | Extra URLs to include that are not auto-discovered (campaign pages, custom routes, etc.). |
+| Additional Links Change Frequency | Additional Links | weekly | Change frequency emitted for additional link entries. |
+| Additional Links Priority | Additional Links | 0.5 | Priority emitted for additional link entries. Range: 0.0 to 1.0. |
 
 ---
 
 ## Managing Sitemap Profiles
 
-Open **Admin → Panth Infotech → XML Sitemap → Sitemap Profiles** to reach the grid (route `panth_xml_sitemap/profile/index`).
+Open **Admin - Panth Infotech - XML Sitemap - Sitemap Profiles**.
 
-### Fields
+Each profile row is scoped to a single store view and carries its own settings for contributor list, shard size, gzip, hreflang, images, video, cron schedule, and active flag.
+
+### Key Profile Fields
 
 | Field | Description |
 |---|---|
-| **Store View** | The store_view this profile applies to. Foreign-keyed to `store.store_id` with `ON DELETE CASCADE`. One profile per store. |
-| **Base URL** | Absolute URL used as the `<loc>` prefix for every entry. Defaults to the store's `web/unsecure/base_url`. Override for CDN domains or alternate apex hosts. |
-| **Max URLs per File** | Per-profile override of the global soft cap. Range 100–50000. |
-| **Enable Hreflang** | Yes / No. When Yes, `Contributor\HreflangContributor` adds alternate-language entries per URL. |
-| **Enable Images** | Yes / No. When Yes, `Contributor\ImageContributor` adds `<image:image>` blocks per product URL. |
-| **Enable Videos** | Yes / No. When Yes, `<video:video>` blocks are added per product URL with associated video media. |
-| **Enable Gzip** | Yes / No. When Yes, shards are written as `.xml.gz`. |
-| **XSL Path** | Optional per-profile XSL stylesheet path. Blank = use global default or skip entirely. |
-| **Ping Google** | Yes / No. Post to Google's ping endpoint on successful write. |
-| **Ping Bing** | Yes / No. Post to Bing's ping endpoint on successful write. |
-| **Enable Queue** | Yes / No. Dispatch each shard to the AMQP topic instead of building synchronously. |
-| **Enable Delta** | Yes / No. Skip shards whose source entities haven't changed since the last run. |
-| **Include Products** | Yes / No. Run `Contributor\Product` for this profile. |
-| **Include Categories** | Yes / No. Run `Contributor\Category` for this profile. |
-| **Include CMS Pages** | Yes / No. Run `Contributor\CmsPage` for this profile. |
-| **Include Landing Pages** | Yes / No. Run `Contributor\LandingPage` (auto-skipped if Panth Landing Pages is not installed). |
-| **Include Blog** | Yes / No. Run `Contributor\Blog` (auto-skipped if no supported blog module is installed). |
-| **Cron Schedule** | Standard cron expression. Default `0 2 * * *`. The cron runner only dispatches this profile when the schedule matches. |
-| **Active** | Per-profile enable/disable. Inactive profiles are skipped by cron and CLI. |
-
-### Mass actions
-
-Select rows and choose **Enable**, **Disable**, **Regenerate Now** or **Delete** from the grid mass-action menu. "Regenerate Now" is a shortcut that dispatches a full rebuild for every selected profile, bypassing the delta tracker once.
+| Store View | The store view this profile applies to. One profile per store. |
+| Base URL | Absolute URL used as the `<loc>` prefix. Defaults to the store's base URL. Override for CDN or custom domains. |
+| Max URLs per File | Per-profile override of the global shard cap. Range: 100 to 50000. |
+| Include Products | Run the product contributor for this profile. |
+| Include Categories | Run the category contributor for this profile. |
+| Include CMS Pages | Run the CMS page contributor for this profile. |
+| Include Landing Pages | Run the landing page contributor (auto-skipped if Panth Landing Pages is not installed). |
+| Include Blog | Run the blog contributor (auto-skipped if no supported blog module is installed). |
+| Enable Hreflang | Add hreflang alternate entries per URL. |
+| Enable Images | Add `<image:image>` blocks per product URL. |
+| Enable Videos | Add `<video:video>` blocks per product URL with video media. |
+| Enable Gzip | Write shards as `.xml.gz`. |
+| Ping Google | POST to Google's ping endpoint on successful write. |
+| Ping Bing | POST to Bing's ping endpoint on successful write. |
+| Enable Queue | Dispatch each shard to the AMQP topic for parallel worker-based generation. |
+| Enable Delta | Skip shards whose source entities have not changed since the last run. |
+| Cron Schedule | Standard cron expression for this profile (default `0 2 * * *`). |
+| Active | Inactive profiles are skipped by cron and CLI. |
 
 ---
 
-## Frontend Endpoint
+## How It Works
 
-- **URL:** `GET /panth-sitemap.xml`
-- **Content-Type:** `application/xml; charset=utf-8`
-- **Controller:** `Panth\XmlSitemap\Controller\Sitemap\Index` at route `xml_sitemap/sitemap/index`.
-
-`/panth-sitemap.xml` is served by our controller via a `url_rewrite` row installed by `Setup\Patch\Data\InstallSitemapRewrite`. The core `Magento_Sitemap` module's filesystem-based sitemap is unaffected — Panth XML Sitemap deliberately uses a different URL so you can keep the native sitemap around for comparison during the first week after install.
-
-If you are upgrading from `Panth_AdvancedSEO` where `/panth-sitemap.xml` was already mapped to that module's controller, the `RefreshSitemapRewrite` patch runs on the next `setup:upgrade` and rewrites the stale `target_path` to point at the new controller — zero manual DB surgery required.
+1. **`Setup\Patch\Data\InstallSitemapRewrite`** installs a `url_rewrite` row that maps `/panth-sitemap.xml` to the module controller at setup time. No manual DB work is needed.
+2. A **Sitemap Profile** defines which entities to include, how to split shards, and when to regenerate. Each profile is scoped to one store view.
+3. **`Model\Sitemap\Builder`** is the orchestrator. It resolves the store scope, iterates registered contributors in a fixed order, pipes each URL through `ShardWriter`, closes shards at the configured threshold, writes the top-level `sitemap_index.xml`, saves run metadata to the delta table, and pings search engines on success.
+4. **Contributors** are plugged in through `di.xml` and can be enabled or disabled per profile. Each contributor queries its entity table, resolves canonical URLs from `url_rewrite`, and yields URL objects with `<lastmod>`, `<changefreq>`, `<priority>`, plus optional hreflang, image, and video blocks.
+5. **`ShardWriter`** writes one XML file at a time, closing and opening a new shard when the URL count reaches the cap or the uncompressed size would exceed 45 MB.
+6. **`DeltaTracker`** records a `last_generated_at` timestamp per entity type after each successful run. The next run compares these timestamps and skips whole contributor shards that have not changed.
+7. **`SearchEnginePinger`** POSTs to Google and Bing after a successful build with a 5-second timeout and one retry on server errors.
+8. **`Cron\Rebuild`** fires on the configured schedule. For async-enabled profiles it dispatches shard jobs to the AMQP queue; for synchronous profiles it calls `Builder::generate()` directly.
+9. **`Console\GenerateCommand`** exposes `panth:seo:sitemap:generate` for manual and CI-driven runs.
 
 ### Sitemap index shape
 
@@ -283,15 +350,7 @@ If you are upgrading from `Panth_AdvancedSEO` where `/panth-sitemap.xml` was alr
     <lastmod>2026-04-21T02:00:05+00:00</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://your-store.test/panth-sitemap-products-2.xml.gz</loc>
-    <lastmod>2026-04-21T02:00:07+00:00</lastmod>
-  </sitemap>
-  <sitemap>
     <loc>https://your-store.test/panth-sitemap-categories-1.xml.gz</loc>
-    <lastmod>2026-04-21T02:00:08+00:00</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://your-store.test/panth-sitemap-cms-1.xml.gz</loc>
     <lastmod>2026-04-21T02:00:08+00:00</lastmod>
   </sitemap>
 </sitemapindex>
@@ -325,8 +384,6 @@ If you are upgrading from `Panth_AdvancedSEO` where `/panth-sitemap.xml` was alr
 
 ## CLI
 
-The module exposes a Magento console command for manual and CI-driven runs:
-
 ```bash
 # Generate every active profile
 bin/magento panth:seo:sitemap:generate
@@ -337,91 +394,146 @@ bin/magento panth:seo:sitemap:generate --profile-id=3
 # Force a full rebuild, bypassing the delta tracker
 bin/magento panth:seo:sitemap:generate --profile-id=3 --force
 
-# Quiet mode (suppress progress, only emit final summary)
+# Quiet mode (suppress per-contributor progress, emit only the final summary)
 bin/magento panth:seo:sitemap:generate --quiet
 ```
 
-Output on a typical 50k-product run:
-
-```
-> bin/magento panth:seo:sitemap:generate --profile-id=1
-Profile #1 (default store): starting...
-  [products]    shard 1  (45000 URLs, 4.8 MB gzipped)
-  [products]    shard 2  (8743 URLs, 0.9 MB gzipped)
-  [categories]  shard 1  (1276 URLs, 0.1 MB gzipped)
-  [cms]         shard 1  (42 URLs, 0.0 MB gzipped)
-  [sitemap_index]         4 shards, 55061 URLs, 5.8 MB on disk
-  [ping:google] OK
-  [ping:bing]   OK
-Profile #1: done in 4.8 s.
-```
-
-Exit codes: `0` on success, `1` on fatal error (invalid profile ID, DB error, disk full, etc.), `2` on partial success (one contributor failed but others completed).
+Exit codes: `0` on success, `1` on fatal error, `2` on partial success (one contributor failed, others completed).
 
 ---
 
 ## Cron
 
-The default cron job is declared in `etc/crontab.xml` and runs on schedule `0 2 * * *` (02:00 daily):
-
-```xml
-<job name="panth_xml_sitemap_rebuild" instance="Panth\XmlSitemap\Cron\Rebuild" method="execute">
-  <schedule>0 2 * * *</schedule>
-</job>
-```
-
-To change the global schedule, override the job in your project's `app/etc/` — or use the per-profile `cron_schedule` column which takes precedence over the global job's schedule for that single profile.
-
-Confirm the cron is registered and has a recent execution:
+The default cron job runs at `0 2 * * *` (02:00 daily):
 
 ```bash
 bin/magento cron:list | grep panth_xml_sitemap
 # panth_xml_sitemap_rebuild   default   0 2 * * *
-
-SELECT job_code, status, executed_at, finished_at
-  FROM cron_schedule
- WHERE job_code = 'panth_xml_sitemap_rebuild'
- ORDER BY scheduled_at DESC
- LIMIT 5;
 ```
 
-### Running the queue consumer
+Each profile can override the schedule with its own cron expression. The cron runner only dispatches a profile when its schedule matches the current run window and its Active flag is Yes.
 
-When any profile has `enable_queue = 1`, start the consumer as a long-running process (systemd / supervisord):
+When any profile has the async queue enabled, start the consumer as a long-running process:
 
 ```bash
 bin/magento queue:consumers:start panth_xml_sitemap_consumer --single-thread
 ```
 
-The consumer ACKs each shard on success and NACKs + retries on transient errors. Messages that fail three times land on the `panth_xml_sitemap.shard.dlq` dead-letter topic for manual inspection.
-
 ---
 
-## Troubleshooting
+## FAQ
 
-### `/panth-sitemap.xml` returns a 404 or a Luma 404 HTML page
+### Does this replace Magento's native sitemap?
 
-You are likely sitting on a stale `url_rewrite` row left behind by `Panth_AdvancedSEO` whose `target_path` still points at the old controller. Run `bin/magento setup:upgrade` — the `RefreshSitemapRewrite` patch fires idempotently and rewrites the row to the new target. Follow with `bin/magento cache:clean config full_page`. Also confirm `panth_xml_sitemap/general/enabled = 1` at the store scope being tested — when the master switch is No, the controller returns 404 regardless of url_rewrite state.
+No. Panth XML Sitemap uses its own URL `/panth-sitemap.xml` (served by the module controller via a `url_rewrite` row), so Magento's native sitemap at its existing path is unaffected. You can run both during a transition period and then remove the native one when ready.
 
-### Sitemap only contains a handful of URLs
+### Why would I use this instead of the native sitemap?
 
-Three causes: (a) the profile has `include_products = 0` / `include_categories = 0` — flip the toggle and re-run; (b) the delta tracker thinks nothing has changed — run the CLI with `--force` once to rebuild from scratch; (c) the store's products have `visibility = 1 (not visible individually)` and are being filtered out as intended — this is correct behaviour for catalog hygiene, not a bug.
+The native Magento sitemap is a single blob written to disk on every cron run, re-crawling every product each time. It has no hreflang, no sharding (so large catalogs silently drop URLs past 50,000), no image or video tags, no incremental regeneration, and no ping-on-write. Panth XML Sitemap solves all of those gaps.
 
-### Shard files missing from `pub/media/panth-sitemap/<store_code>/`
+### Will it work on my Hyva store?
 
-The `panth-sitemap` writable root was never created. Run `chmod -R u+w pub/media && mkdir -p pub/media/panth-sitemap && chown -R www-data:www-data pub/media/panth-sitemap`, then re-run the CLI. On a containerised deploy ensure the `pub/media` volume is writable by the PHP-FPM user.
+Yes. The sitemap pipeline is entirely backend (PHP). There is no frontend JavaScript, so it works with Hyva, Luma, and any custom theme.
 
-### Queue consumer shows "topic not found"
+### How do I see if the sitemap was generated correctly?
 
-The queue topology hasn't been declared on the AMQP broker. Run `bin/magento queue:consumers:start panth_xml_sitemap_consumer --single-thread` once — on first connect it declares the `panth_xml_sitemap.shard` topic, the `panth_xml_sitemap_consumer` queue, and the binding. You can also run `bin/magento setup:upgrade` which triggers the declaration via the DI.xml consumer wiring.
+Open **Admin - Panth Infotech - XML Sitemap - Sitemap Profiles**, find your profile row, and click "View Sitemap". You can also visit `/panth-sitemap.xml` directly in the browser and the XSL stylesheet (if enabled) renders it as a readable table.
 
-### Hreflang tags missing from shards despite `enable_hreflang = 1`
+### Hreflang tags are not appearing in the shards. Why?
 
-Hreflang only fires when the store has two or more `store_view` rows with different `locale` codes. A single-locale store legitimately has no alternates to emit, so the contributor is a no-op. Confirm with `SELECT code, locale_code FROM store s JOIN core_config_data c ON c.scope_id = s.store_id WHERE c.path = 'general/locale/code';` — you need at least two distinct `locale_code` values.
+Hreflang only fires when the store has two or more store views with different locale codes. A single-locale store has no alternates to emit, so the contributor is a no-op. Confirm you have at least two locale codes configured under Stores - Store Views.
+
+### How does delta tracking work?
+
+After each successful run the module saves a `last_generated_at` timestamp per entity type in `panth_seo_sitemap_shard`. On the next cron run, the builder compares those timestamps against the entity tables and skips contributors whose data has not changed. Run the CLI with `--force` to bypass delta tracking and do a full rebuild.
+
+### The sitemap returns a 404. How do I fix it?
+
+Run `bin/magento setup:upgrade` to have the `InstallSitemapRewrite` (or `RefreshSitemapRewrite`) patch install or repair the `url_rewrite` row. Then flush the config and full-page cache. Also check that the module is enabled and that the master toggle in configuration is set to Yes.
+
+### Can I add custom URLs that are not product, category, or CMS pages?
+
+Yes. Use the Additional Links textarea in configuration (**Stores - Configuration - Panth Extensions - XML Sitemap - Additional Links**) or add a Custom Links section to a profile. Enter one URL per line.
+
+### Does it support async generation for large stores?
+
+Yes. Enable the queue flag on any profile and start the consumer `bin/magento queue:consumers:start panth_xml_sitemap_consumer`. Each shard is dispatched to the `panth_xml_sitemap.shard` AMQP topic and built in parallel.
 
 ---
 
 ## Support
 
-- **Agency:** [Panth Infotech on Upwork](https://www.upwork.com/agencies/1881421506131960778/)
-- **Direct:** [kishansavaliya.com](https://kishansavaliya.com) — [Get a free quote](https://kishansavaliya.com/get-quote)
+| Channel | Contact |
+|---|---|
+| Product Page | [kishansavaliya.com/magento-2-xml-sitemap.html](https://kishansavaliya.com/magento-2-xml-sitemap.html) |
+| Email | kishansavaliyakb@gmail.com |
+| Website | [kishansavaliya.com](https://kishansavaliya.com) |
+| WhatsApp | +91 84012 70422 |
+| GitHub Issues | [github.com/mage2sk/module-xml-sitemap/issues](https://github.com/mage2sk/module-xml-sitemap/issues) |
+| Upwork (Top Rated Plus) | [Hire Kishan Savaliya](https://www.upwork.com/freelancers/~016dd1767321100e21) |
+| Upwork Agency | [Panth Infotech](https://www.upwork.com/agencies/1881421506131960778/) |
+
+Response time: 1-2 business days.
+
+### Need Custom Magento Development?
+
+Looking for **custom Magento module development**, **Hyva theme work**, **store migrations**, or **performance tuning**? Get a free quote in 24 hours:
+
+<p align="center">
+  <a href="https://kishansavaliya.com/get-quote">
+    <img src="https://img.shields.io/badge/%F0%9F%92%AC%20Get%20a%20Free%20Quote-kishansavaliya.com%2Fget--quote-DC2626?style=for-the-badge" alt="Get a Free Quote" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.upwork.com/freelancers/~016dd1767321100e21">
+    <img src="https://img.shields.io/badge/Hire%20Kishan-Top%20Rated%20Plus-14a800?style=for-the-badge&logo=upwork&logoColor=white" alt="Hire on Upwork" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://www.upwork.com/agencies/1881421506131960778/">
+    <img src="https://img.shields.io/badge/Visit-Panth%20Infotech%20Agency-14a800?style=for-the-badge&logo=upwork&logoColor=white" alt="Visit Agency" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://kishansavaliya.com/magento-2-xml-sitemap.html">
+    <img src="https://img.shields.io/badge/View%20Product%20Page-magento--2--xml--sitemap-0D9488?style=for-the-badge" alt="View Product Page" />
+  </a>
+</p>
+
+---
+
+## About Panth Infotech
+
+Built and maintained by **Kishan Savaliya** ([kishansavaliya.com](https://kishansavaliya.com)), a **Top Rated Plus** Magento developer on Upwork with 10+ years of eCommerce experience.
+
+**Panth Infotech** is a Magento 2 development agency that builds high quality, security focused extensions and themes for both Hyva and Luma storefronts. The extension suite covers SEO, performance, checkout, product presentation, customer engagement, and store management, with each module built to MEQP standards and tested across Magento 2.4.4 to 2.4.8.
+
+Browse the full extension catalog on our [Magento extensions page](https://kishansavaliya.com/magento-extensions.html) or on [Packagist](https://packagist.org/packages/mage2kishan/).
+
+---
+
+## Quick Links
+
+| Resource | Link |
+|---|---|
+| **Product Page** | [magento-2-xml-sitemap.html](https://kishansavaliya.com/magento-2-xml-sitemap.html) |
+| **Packagist** | [mage2kishan/module-xml-sitemap](https://packagist.org/packages/mage2kishan/module-xml-sitemap) |
+| **GitHub** | [mage2sk/module-xml-sitemap](https://github.com/mage2sk/module-xml-sitemap) |
+| **Website** | [kishansavaliya.com](https://kishansavaliya.com) |
+| **Free Quote** | [kishansavaliya.com/get-quote](https://kishansavaliya.com/get-quote) |
+| **Upwork (Top Rated Plus)** | [Hire Kishan Savaliya](https://www.upwork.com/freelancers/~016dd1767321100e21) |
+| **Upwork Agency** | [Panth Infotech](https://www.upwork.com/agencies/1881421506131960778/) |
+| **Email** | kishansavaliyakb@gmail.com |
+| **WhatsApp** | +91 84012 70422 |
+
+---
+
+<p align="center">
+  <strong>Ready to give search engines a complete, well-structured sitemap?</strong><br/>
+  <a href="https://kishansavaliya.com/magento-2-xml-sitemap.html">
+    <img src="https://img.shields.io/badge/%F0%9F%9A%80%20See%20XML%20Sitemap%20%E2%86%92-Product%20Page%20%26%20Details-DC2626?style=for-the-badge" alt="See XML Sitemap" />
+  </a>
+</p>
+
+---
+
+**SEO Keywords:** magento 2 xml sitemap, magento 2 sitemap extension, magento 2 sitemap module, magento sharded sitemap, magento sitemap sharding, magento hreflang sitemap, magento image sitemap, magento image tags sitemap, magento video sitemap, magento video tags sitemap, magento sitemap gzip, magento sitemap compression, magento sitemap search engine ping, magento sitemap cron, magento sitemap cli, magento sitemap generator, magento delta sitemap, magento incremental sitemap, hyva xml sitemap, hyva sitemap extension, luma xml sitemap, magento 2 sitemap index, magento 2 multi-store sitemap, magento 2 sitemap profile, magento 2.4.8 sitemap, php 8.4 sitemap, mage2kishan xml sitemap, panth xml sitemap, panth infotech, hire magento developer, top rated plus upwork, kishan savaliya magento, custom magento development

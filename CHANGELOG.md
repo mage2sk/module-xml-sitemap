@@ -4,7 +4,13 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.0.22] — 2026-05-13
+## [1.0.23] - 2026-06-18
+
+### Changed
+
+- README rewritten to match Panth Infotech gold template structure: added SEO meta comment, badge row with live product URL, Quick Answer block, hire/agency promo, Who Is It For, Key Features grouped by area, Screenshots section, full Configuration table from system.xml, Managing Sitemap Profiles, How It Works, CLI, Cron, FAQ (9 entries), Support table, About Panth Infotech, Quick Links table, and SEO Keywords footer.
+
+## [1.0.22] - 2026-05-13
 
 ### Fixed
 
