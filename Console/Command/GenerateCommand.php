@@ -25,9 +25,6 @@ class GenerateCommand extends Command
 
     protected function configure(): void
     {
-        // CLI command name retained as `panth:seo:sitemap:generate` for
-        // back-compat with existing CI / cron entries that were installed
-        // under the legacy Panth_AdvancedSEO module.
         $this->setName('panth:seo:sitemap:generate')
             ->setDescription('Generate sharded XML sitemap(s) for one or all stores, optionally from a profile.')
             ->addOption('store', 's', InputOption::VALUE_REQUIRED, 'Store code or id (default: all stores)')
@@ -39,31 +36,22 @@ class GenerateCommand extends Command
         try {
             $this->appState->setAreaCode(Area::AREA_FRONTEND);
         } catch (\Throwable) {
-            // area already set
         }
 
         $profileArg = $input->getOption('profile');
         $storeArg   = $input->getOption('store');
 
-        // Profile mode: generate sitemap for a specific profile
         if ($profileArg !== null && $profileArg !== '') {
             return $this->executeProfile((int) $profileArg, $output);
         }
 
-        // Store mode: generate for all active profiles in that store,
-        // or fall back to legacy build if no profiles exist
         if ($storeArg !== null && $storeArg !== '') {
             return $this->executeStore($storeArg, $output);
         }
 
-        // No args: generate for all active profiles across all stores,
-        // or fall back to legacy build per store
         return $this->executeAll($output);
     }
 
-    /**
-     * Generate sitemap for a specific profile ID.
-     */
     private function executeProfile(int $profileId, OutputInterface $output): int
     {
         if (!$this->builder instanceof Builder) {
@@ -105,9 +93,6 @@ class GenerateCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * Generate sitemaps for a specific store (all active profiles or legacy build).
-     */
     private function executeStore(string $storeArg, OutputInterface $output): int
     {
         try {
@@ -121,7 +106,6 @@ class GenerateCommand extends Command
 
         $storeId = (int) $store->getId();
 
-        // Try profile-based generation first
         if ($this->builder instanceof Builder) {
             $profiles = $this->builder->loadActiveProfiles($storeId);
             if (!empty($profiles)) {
@@ -143,7 +127,6 @@ class GenerateCommand extends Command
             }
         }
 
-        // Legacy build (no profiles)
         $output->writeln(sprintf(
             '<info>Building sitemap for store "%s" (id %d)...</info>',
             $store->getCode(),
@@ -163,12 +146,8 @@ class GenerateCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * Generate sitemaps for all stores / all active profiles.
-     */
     private function executeAll(OutputInterface $output): int
     {
-        // Try profile-based generation first
         if ($this->builder instanceof Builder) {
             $profiles = $this->builder->loadActiveProfiles();
             if (!empty($profiles)) {
@@ -188,7 +167,6 @@ class GenerateCommand extends Command
             }
         }
 
-        // Legacy: build for all stores
         $exitCode = Command::SUCCESS;
         foreach ($this->storeRepository->getList() as $store) {
             if ((int) $store->getId() === 0) {

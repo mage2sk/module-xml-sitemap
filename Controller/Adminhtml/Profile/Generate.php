@@ -30,7 +30,6 @@ class Generate extends AbstractAction implements HttpGetActionInterface, HttpPos
 
         try {
             if ($profileId > 0) {
-                // Profile-based generation
                 $profile = $this->builder->loadProfile($profileId);
                 if ($profile === null) {
                     $this->messageManager->addErrorMessage(
@@ -52,7 +51,6 @@ class Generate extends AbstractAction implements HttpGetActionInterface, HttpPos
                     )
                 );
             } else {
-                // Legacy: generate for all active profiles
                 $profiles = $this->builder->loadActiveProfiles();
                 if (!empty($profiles)) {
                     $totalUrls  = 0;

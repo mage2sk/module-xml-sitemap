@@ -8,9 +8,6 @@ use Panth\XmlSitemap\Model\ResourceModel\Profile\CollectionFactory;
 
 class ProfileFormDataProvider extends AbstractDataProvider
 {
-    /**
-     * @var array|null
-     */
     private ?array $loadedData = null;
 
     public function __construct(
@@ -36,14 +33,13 @@ class ProfileFormDataProvider extends AbstractDataProvider
 
         foreach ($items as $item) {
             $itemData = $item->getData();
-            // Convert entity_types comma-separated string to array for multiselect/checkboxes
+
             if (isset($itemData['entity_types']) && is_string($itemData['entity_types'])) {
                 $itemData['entity_types'] = explode(',', $itemData['entity_types']);
             }
             $this->loadedData[$item->getId()] = $itemData;
         }
 
-        // For new entities, provide sensible defaults
         if (empty($this->loadedData)) {
             $this->loadedData[''] = [
                 'is_active' => '1',

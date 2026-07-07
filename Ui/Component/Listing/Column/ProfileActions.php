@@ -40,9 +40,6 @@ class ProfileActions extends Column
                 continue;
             }
 
-            // Build the view sitemap URL. Only surface the action when the
-            // profile has actually been generated; otherwise the link would
-            // 404. Respect the profile's `output_path` template.
             $fileCount = (int) ($item['file_count'] ?? 0);
             if ($fileCount > 0) {
                 $sitemapUrl = $this->getSitemapUrl($item);
@@ -83,9 +80,7 @@ class ProfileActions extends Column
     {
         try {
             $storeId = (int) ($item['store_id'] ?? 0);
-            // The form blocks store_id <= 0 from being saved, but legacy
-            // rows from before v1.0.9 could still have store_id = 0;
-            // fall back to the default store view so the link resolves.
+
             if ($storeId <= 0) {
                 $storeId = (int) ($this->storeManager->getDefaultStoreView()?->getId() ?: 1);
             }

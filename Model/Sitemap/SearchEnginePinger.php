@@ -8,10 +8,6 @@ use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\HTTP\Client\CurlFactory;
 use Psr\Log\LoggerInterface;
 
-/**
- * Pings search engines after a sitemap rebuild so they discover updated content
- * as quickly as possible. Each engine can be individually toggled via admin config.
- */
 class SearchEnginePinger
 {
     private const ENGINES = [
@@ -25,7 +21,6 @@ class SearchEnginePinger
         ],
     ];
 
-    /** @var int */
     private const TIMEOUT = 15;
 
     public function __construct(
@@ -35,11 +30,6 @@ class SearchEnginePinger
     ) {
     }
 
-    /**
-     * Ping all enabled search engines with the given sitemap URL.
-     *
-     * @return array<string, array{success: bool, status: int}>
-     */
     public function ping(string $sitemapUrl): array
     {
         $results = [];
@@ -55,7 +45,6 @@ class SearchEnginePinger
             $pingUrl = $meta['url'] . urlencode($sitemapUrl);
 
             try {
-                /** @var Curl $curl */
                 $curl = $this->curlFactory->create();
                 $curl->setTimeout(self::TIMEOUT);
                 $curl->setOption(CURLOPT_FOLLOWLOCATION, true);

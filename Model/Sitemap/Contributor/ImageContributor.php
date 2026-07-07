@@ -12,14 +12,6 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 
-/**
- * Streams product URLs and attaches image:image entries for each product
- * (up to N media gallery images). Batches product collection so memory
- * stays bounded.
- *
- * NOTE: When enabled, disable ProductContributor to avoid duplicate <url>
- * entries — this contributor already emits the same product loc with images.
- */
 class ImageContributor implements ContributorInterface
 {
     private const BATCH = 500;
@@ -43,7 +35,6 @@ class ImageContributor implements ContributorInterface
         $store   = $this->storeManager->getStore($storeId);
         $baseUrl = rtrim((string) $store->getBaseUrl(), '/') . '/';
 
-        // Get list of product IDs + URL paths first via url_rewrite
         $conn     = $this->resource->getConnection();
         $urlTable = $this->resource->getTableName('url_rewrite');
 
@@ -77,19 +68,13 @@ class ImageContributor implements ContributorInterface
         }
     }
 
-    /**
-     * @param int[] $ids
-     * @param array<int,string> $meta
-     */
     private function emitBatch(array $ids, array $meta, int $storeId, string $baseUrl): \Generator
     {
         $collection = $this->productCollectionFactory->create();
         $collection->setStoreId($storeId)
             ->addAttributeToSelect(['name', 'image'])
             ->addFieldToFilter('entity_id', ['in' => $ids])
-            // url_rewrite outlives status / visibility / website unassignment,
-            // so the same filters the native sitemap applies need to apply
-            // here too — otherwise disabled or de-listed products leak in.
+
             ->addAttributeToFilter('status', ProductStatus::STATUS_ENABLED)
             ->setVisibility([
                 ProductVisibility::VISIBILITY_IN_CATALOG,
@@ -98,7 +83,6 @@ class ImageContributor implements ContributorInterface
             ->addWebsiteFilter((int) $this->storeManager->getStore($storeId)->getWebsiteId())
             ->addMediaGalleryData();
 
-        /** @var Product $product */
         foreach ($collection as $product) {
             $id = (int) $product->getId();
             if (!isset($meta[$id])) {

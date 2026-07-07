@@ -10,14 +10,6 @@ use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Helper\PathResolver;
 
-/**
- * "View Sitemap" toolbar button — opens the generated sitemap_index.xml
- * in a new tab. Only rendered when the profile has been generated at
- * least once (file_count > 0) so the link points at real files.
- *
- * Honours the profile's output_path column (with `{store_code}` substitution)
- * so custom output locations work too.
- */
 class ViewSitemapButton implements ButtonProviderInterface
 {
     public function __construct(
@@ -58,7 +50,6 @@ class ViewSitemapButton implements ButtonProviderInterface
         ];
     }
 
-    /** @param array<string,mixed> $profile */
     private function buildSitemapUrl(array $profile): string
     {
         try {

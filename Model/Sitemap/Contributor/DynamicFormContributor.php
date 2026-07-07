@@ -8,23 +8,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Sitemap contributor for `Panth_DynamicForms`.
- *
- * **Optional integration** — never references a `Panth_DynamicForms`
- * class. The contributor checks for the `panth_dynamic_form` table at
- * runtime and yields zero URLs when the source module isn't installed.
- *
- * URL pattern (matches the source module's Controller/Router.php):
- *   - /pages/{url_key}    for forms with form_type ∈ ('page', 'both')
- *
- * Forms with `form_type = 'widget'` are intentionally skipped — they
- * render inside other CMS pages and don't have a standalone URL.
- *
- * Store scope is honoured via the `store_id` column on the row
- * (`store_id = 0` = "all stores", treated as visible from every
- * store view).
- */
 class DynamicFormContributor implements ContributorInterface
 {
     private const FORM_TABLE = 'panth_dynamic_form';
@@ -52,7 +35,6 @@ class DynamicFormContributor implements ContributorInterface
 
         $table = $this->resource->getTableName(self::FORM_TABLE);
         if (!$conn->isTableExists($table)) {
-            // Source module isn't installed — yield nothing silently.
             return;
         }
 
@@ -103,7 +85,6 @@ class DynamicFormContributor implements ContributorInterface
                         $entry['lastmod'] = (new \DateTimeImmutable((string) $row['updated_at']))
                             ->format('Y-m-d\TH:i:sP');
                     } catch (\Throwable) {
-                        // skip lastmod on parse failure rather than abort
                     }
                 }
                 yield $entry;

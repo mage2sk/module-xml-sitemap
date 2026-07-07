@@ -3,23 +3,8 @@ declare(strict_types=1);
 
 namespace Panth\XmlSitemap\Model\Sitemap;
 
-/**
- * Generates an XSL stylesheet string for rendering XML sitemaps as
- * human-readable HTML tables in the browser.
- *
- * The Builder can reference this via an `<?xml-stylesheet?>` processing
- * instruction so that opening a sitemap shard directly in a browser shows
- * a styled, sortable table with URL, Last Modified, Change Frequency and
- * Priority columns.
- */
 class XslStylesheet
 {
-    /**
-     * Returns a complete XSL stylesheet as a string.
-     *
-     * The stylesheet transforms a standard <urlset> sitemap into a styled
-     * HTML page with an inline CSS table layout.
-     */
     public function getStylesheet(): string
     {
         return <<<'XSL'

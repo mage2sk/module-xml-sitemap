@@ -7,14 +7,6 @@ use Magento\Sitemap\Model\ResourceModel\Sitemap\CollectionFactory as SitemapColl
 use Panth\XmlSitemap\Model\Sitemap\Builder;
 use Psr\Log\LoggerInterface;
 
-/**
- * Nightly sitemap rebuild.
- *
- * Iterates all active sitemap profiles with cron_enabled = 1 and generates
- * sitemaps for each. After generation, updates the profile row with stats.
- *
- * Falls back to Magento's built-in sitemap collection when no profiles exist.
- */
 class Rebuild
 {
     public function __construct(
@@ -27,7 +19,6 @@ class Rebuild
     public function execute(): void
     {
         try {
-            // Profile-based generation: iterate all cron-enabled active profiles
             $profiles = $this->builder->loadActiveProfiles(null, true);
 
             if (!empty($profiles)) {
@@ -43,7 +34,6 @@ class Rebuild
                     try {
                         $stats = $this->builder->buildFromProfile($profile);
 
-                        // Update profile row with generation stats
                         $this->builder->updateProfileStats($profileId, $stats);
 
                         $this->logger->info(sprintf(
@@ -67,7 +57,6 @@ class Rebuild
                 return;
             }
 
-            // Fallback: Magento's built-in sitemap collection
             $collection = $this->collectionFactory->create();
             foreach ($collection as $sitemap) {
                 try {

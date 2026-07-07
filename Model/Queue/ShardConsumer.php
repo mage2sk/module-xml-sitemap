@@ -6,15 +6,6 @@ namespace Panth\XmlSitemap\Model\Queue;
 use Panth\XmlSitemap\Api\BuilderInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Queue consumer for topic `panth_seo.sitemap_shard`.
- *
- * Message payload: JSON { "store_id": int }
- *
- * Triggers a full sitemap rebuild for the given store. This allows the
- * sitemap generation to be offloaded to a queue worker instead of running
- * synchronously during cron or admin actions.
- */
 class ShardConsumer
 {
     public function __construct(

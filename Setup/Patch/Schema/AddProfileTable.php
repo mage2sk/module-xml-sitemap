@@ -7,9 +7,6 @@ use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\Patch\SchemaPatchInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 
-/**
- * Creates the panth_seo_sitemap_profile table for configurable sitemap profiles.
- */
 class AddProfileTable implements SchemaPatchInterface
 {
     public const TABLE_NAME = 'panth_seo_sitemap_profile';

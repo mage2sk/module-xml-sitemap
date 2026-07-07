@@ -7,9 +7,6 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 
-/**
- * Inserts a default "Main Sitemap" profile with all entity types enabled.
- */
 class AddDefaultProfile implements DataPatchInterface
 {
     public function __construct(
@@ -35,7 +32,6 @@ class AddDefaultProfile implements DataPatchInterface
         $conn = $this->resource->getConnection();
         $table = $this->resource->getTableName('panth_seo_sitemap_profile');
 
-        // Check if a profile already exists
         $existing = $conn->fetchOne(
             $conn->select()->from($table, ['profile_id'])->limit(1)
         );

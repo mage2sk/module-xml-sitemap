@@ -34,10 +34,6 @@ class Save extends AbstractAction implements HttpPostActionInterface
 
         $id = (int)($data['profile_id'] ?? 0);
 
-        // Defence-in-depth: the form's StoreViewSource only offers real
-        // store views, but a hand-crafted POST could still try to land
-        // store_id = 0 ("All Store Views"). Reject it here so the row
-        // never reaches the database.
         $storeId = (int)($data['store_id'] ?? 0);
         if ($storeId <= 0) {
             $this->messageManager->addErrorMessage(
@@ -52,7 +48,6 @@ class Save extends AbstractAction implements HttpPostActionInterface
             return $resultRedirect->setPath('*/*/edit', $id > 0 ? ['id' => $id] : []);
         }
 
-        // Handle entity_types - could come as array from checkboxes or comma-separated string
         $entityTypes = $data['entity_types'] ?? 'product,category,cms';
         if (is_array($entityTypes)) {
             $entityTypes = implode(',', $entityTypes);

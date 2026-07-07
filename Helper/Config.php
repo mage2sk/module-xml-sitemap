@@ -8,13 +8,6 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
 
-/**
- * Config-access facade for the `panth_xml_sitemap/*` system-config section.
- *
- * The section was reorganised during the extraction from Panth_AdvancedSEO:
- * fields are now split across six groups (general, generation, hreflang,
- * media, ping, additional) mirroring the admin UI.
- */
 class Config extends AbstractHelper
 {
     public const XML_SITEMAP_ENABLED               = 'panth_xml_sitemap/general/enabled';

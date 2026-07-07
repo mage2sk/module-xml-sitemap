@@ -10,35 +10,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Sitemap contributor for `Panth_Testimonials`.
- *
- * **Optional integration** — this class never references any class
- * from `Panth_Testimonials`. Behaviour is fully conditional on the
- * source module's tables being present:
- *
- *   - `panth_testimonial`           individual testimonials (status, url_key, store_id, updated_at)
- *   - `panth_testimonial_category`  category landing pages
- *
- * If neither table exists (the merchant hasn't installed the
- * testimonials module on this site) the contributor yields zero
- * URLs and emits no log noise. If one of the two tables is missing,
- * only the present one contributes.
- *
- * URL patterns produced (matches Panth_Testimonials Controller/Router.php):
- *   - /{base}/                          → listing page
- *   - /{base}/{url_key}                 → individual testimonial (status = 1 / approved)
- *   - /{base}/category/{url_key}        → category landing (is_active = 1)
- *
- * The base segment defaults to `testimonials` but can be configured
- * by the merchant in Stores → Configuration → Panth → Testimonials →
- * URL Route. The source module's `system.xml` writes that field to
- * `panth_testimonials/general/route` (matches Helper\Data::XML_PATH_ROUTE),
- * which is the exact path we read here. v1.0.11 mistakenly read
- * `panth_testimonials/general/base_url` — a path that nothing writes —
- * so a merchant who renamed the route to e.g. `reviews` ended up with
- * sitemap URLs pointing at `/testimonials/{slug}` (404).
- */
 class TestimonialContributor implements ContributorInterface
 {
     private const ITEM_TABLE     = 'panth_testimonial';
@@ -74,7 +45,6 @@ class TestimonialContributor implements ContributorInterface
         $hasItems      = $conn->isTableExists($itemTable);
         $hasCategories = $conn->isTableExists($categoryTable);
         if (!$hasItems && !$hasCategories) {
-            // Source module isn't installed on this site — yield nothing.
             return;
         }
 
@@ -89,15 +59,12 @@ class TestimonialContributor implements ContributorInterface
         $changefreq = $config['changefreq'] ?? 'monthly';
         $priority   = isset($config['priority']) ? (float) $config['priority'] : 0.5;
 
-        // Listing page — always emit when at least one of the source
-        // tables exists.
         yield [
             'loc'        => $baseUrl . $base,
             'changefreq' => $changefreq,
             'priority'   => min(1.0, $priority + 0.1),
         ];
 
-        // Category landing pages.
         if ($hasCategories) {
             try {
                 $select = $conn->select()
@@ -106,7 +73,7 @@ class TestimonialContributor implements ContributorInterface
                     ->where('store_id IN (?)', [0, $storeId])
                     ->where('url_key IS NOT NULL')
                     ->where('url_key != ?', '');
-                // updated_at is optional on the category table — fold it in if it exists.
+
                 $cols = $conn->describeTable($categoryTable);
                 if (isset($cols['updated_at'])) {
                     $select->reset(\Magento\Framework\DB\Select::COLUMNS);
@@ -134,8 +101,6 @@ class TestimonialContributor implements ContributorInterface
             }
         }
 
-        // Individual testimonial pages — `status = 1` is the
-        // "approved" state in the source module's enum.
         if ($hasItems) {
             try {
                 $cols = $conn->describeTable($itemTable);

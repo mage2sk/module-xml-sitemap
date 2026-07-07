@@ -7,11 +7,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 
-/**
- * Contributes manually entered URLs (one per line in admin textarea) to the
- * sitemap. Useful for landing pages, external microsites, or any URL that is
- * not automatically discoverable by the standard contributors.
- */
 class AdditionalLinksContributor implements ContributorInterface
 {
     private const CONFIG_LINKS      = 'panth_xml_sitemap/additional/additional_links';
@@ -60,7 +55,6 @@ class AdditionalLinksContributor implements ContributorInterface
                 continue;
             }
 
-            // Deduplicate within the same generation run
             if (isset($seen[$url])) {
                 continue;
             }
@@ -101,7 +95,6 @@ class AdditionalLinksContributor implements ContributorInterface
 
         $float = (float) $value;
 
-        // Sitemap priority must be between 0.0 and 1.0 inclusive
         if ($float < 0.0 || $float > 1.0) {
             return self::DEFAULT_PRIORITY;
         }
@@ -109,9 +102,6 @@ class AdditionalLinksContributor implements ContributorInterface
         return round($float, 1);
     }
 
-    /**
-     * Validates that the string is a well-formed absolute HTTP(S) URL.
-     */
     private function isValidUrl(string $url): bool
     {
         return filter_var($url, FILTER_VALIDATE_URL) !== false

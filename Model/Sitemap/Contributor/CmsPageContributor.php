@@ -39,11 +39,6 @@ class CmsPageContributor implements ContributorInterface
         $changefreq = $config['changefreq'] ?? 'monthly';
         $priority   = isset($config['priority']) ? (float) $config['priority'] : 0.5;
 
-        // Belt-and-braces over `exclude_noindex`. Profile column
-        // `excluded_cms_identifiers` is a newline-separated list of CMS page
-        // identifiers (e.g. `home`, `no-route`) that should never appear in
-        // the sitemap, regardless of whether the noindex join is on or
-        // whether panth_seo_resolved has caught up with cms_page changes.
         $excluded = [];
         if (!empty($config['excluded_cms_identifiers'])) {
             $parts = preg_split('/\R|\s*,\s*/', (string) $config['excluded_cms_identifiers']) ?: [];
@@ -53,9 +48,6 @@ class CmsPageContributor implements ContributorInterface
             ));
         }
 
-        // GROUP BY page_id because cms_page_store can hold both "All Store
-        // Views" (store_id=0) and a specific store row for the same page,
-        // which would otherwise emit duplicate <url> entries.
         $select = $conn->select()
             ->from(['p' => $page], ['identifier', 'update_time'])
             ->join(['ps' => $store2], 'ps.page_id = p.page_id', [])
@@ -77,8 +69,6 @@ class CmsPageContributor implements ContributorInterface
             $select->where('seo.robots IS NULL OR seo.robots NOT LIKE ?', '%noindex%');
         }
 
-        // The configured home page resolves to "/" — emitting it under its
-        // CMS identifier would duplicate the homepage URL in the sitemap.
         $homeIdentifier = (string) $this->scopeConfig->getValue(
             'web/default/cms_home_page',
             ScopeInterface::SCOPE_STORE,

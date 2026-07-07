@@ -10,19 +10,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
 use Panth\XmlSitemap\Helper\PathResolver;
 
-/**
- * Renders the public sitemap URL inline in the profile grid as a
- * clickable link.
- *
- * Before this column existed the sitemap URL was buried under the
- * Action dropdown's "View Sitemap" entry, which several merchants
- * missed. Showing the URL directly in the grid lets them copy/paste
- * into Search Console or share it with crawlers without first opening
- * the row.
- *
- * Empty cells are rendered for un-generated profiles (file_count = 0)
- * so the column doesn't surface 404 links.
- */
 class SitemapUrl extends Column
 {
     public function __construct(
@@ -63,7 +50,6 @@ class SitemapUrl extends Column
         return $dataSource;
     }
 
-    /** @param array<string,mixed> $item */
     private function buildUrl(array $item): string
     {
         try {

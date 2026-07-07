@@ -10,42 +10,12 @@ use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Api\ContributorInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Sitemap contributor for `Panth_Faq`.
- *
- * **Optional integration** — never references a class from
- * `Panth_Faq`. Behaviour depends entirely on the presence of the
- * source module's tables:
- *
- *   - `panth_faq_item`              individual question/answer rows
- *   - `panth_faq_item_store`        store-scope junction (item_id, store_id)
- *   - `panth_faq_category`          category landing pages
- *
- * If neither item table nor category table exists the contributor
- * yields zero URLs. If only one is present, only that side
- * contributes.
- *
- * URL patterns (matches Panth_Faq Controller/Router.php):
- *   - /{base}                          → main FAQ page
- *   - /{base}/category/{url_key}       → category landing
- *   - /{base}/item/{url_key}           → individual FAQ item with a slug
- *
- * The base segment defaults to `faq` but the source module exposes
- * `panth_faq/general/faq_route` so a merchant who renamed it (e.g.
- * to `help` or `faqs`) gets the right URLs in the sitemap.
- */
 class FaqContributor implements ContributorInterface
 {
     private const ITEM_TABLE       = 'panth_faq_item';
     private const ITEM_STORE_TABLE = 'panth_faq_item_store';
     private const CATEGORY_TABLE   = 'panth_faq_category';
-    /**
-     * Source module stores the front-facing slug under this path
-     * (Helper\Data::XML_PATH_FAQ_ROUTE in module-faq). v1.0.10
-     * mistakenly read `panth_faq/general/url_key`, which was never
-     * populated, so the contributor always emitted /faq/* even when
-     * the merchant renamed the route.
-     */
+
     private const XML_URL_KEY      = 'panth_faq/general/faq_route';
     private const DEFAULT_BASE     = 'faq';
 
@@ -93,14 +63,12 @@ class FaqContributor implements ContributorInterface
         $changefreq = $config['changefreq'] ?? 'monthly';
         $priority   = isset($config['priority']) ? (float) $config['priority'] : 0.5;
 
-        // Main FAQ landing page.
         yield [
             'loc'        => $baseUrl . $base,
             'changefreq' => $changefreq,
             'priority'   => min(1.0, $priority + 0.1),
         ];
 
-        // FAQ category landing pages.
         if ($hasCategories) {
             try {
                 $cols = $conn->describeTable($categoryTable);
@@ -134,7 +102,6 @@ class FaqContributor implements ContributorInterface
             }
         }
 
-        // Individual FAQ items.
         if ($hasItems) {
             try {
                 $cols = $conn->describeTable($itemTable);
@@ -150,10 +117,6 @@ class FaqContributor implements ContributorInterface
                     $select->where('i.is_active = ?', 1);
                 }
                 if ($hasItemStore) {
-                    // Restrict to items mapped to the current store
-                    // OR the all-stores scope (store_id = 0). Use a
-                    // semi-join so duplicate rows from a multi-store
-                    // mapping don't get yielded twice.
                     $select->join(
                         ['s' => $itemStore],
                         's.item_id = i.item_id AND s.store_id IN (0, ' . (int) $storeId . ')',

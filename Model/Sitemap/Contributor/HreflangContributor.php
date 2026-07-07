@@ -9,20 +9,6 @@ use Panth\XmlSitemap\Api\ContributorInterface;
 use Panth\XmlSitemap\Api\HreflangResolverInterface;
 use Panth\XmlSitemap\Helper\Config;
 
-/**
- * Streams product + category URLs with hreflang <xhtml:link> alternates.
- * Uses the local {@see HreflangResolverInterface} to look up the alternate
- * set per entity.
- *
- * The default DI binding for that interface is
- * {@see \Panth\XmlSitemap\Model\Hreflang\NullHreflangResolver}, which
- * returns an empty array — so this contributor is a silent no-op unless
- * the project declares a `<preference>` swapping in an adapter that
- * delegates to mage2kishan/module-hreflang (or another resolver).
- *
- * NOTE: When wired up, disable Product/Category contributors to avoid
- * duplicate <url> entries — hreflang wraps the same locs.
- */
 class HreflangContributor implements ContributorInterface
 {
     public function __construct(
@@ -66,9 +52,6 @@ class HreflangContributor implements ContributorInterface
                 }
                 $alts = $this->hreflangResolver->getAlternates($type, $id, $storeId);
                 if ($alts === []) {
-                    // No alternates resolved => nothing to add over what
-                    // Product/Category contributors already emit. Skip
-                    // to avoid duplicate <url> rows.
                     continue;
                 }
                 $hreflang = [];

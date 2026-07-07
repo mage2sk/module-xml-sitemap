@@ -12,11 +12,6 @@ use Magento\Framework\Filesystem;
 use Magento\Store\Model\StoreManagerInterface;
 use Panth\XmlSitemap\Api\BuilderInterface;
 
-/**
- * Streams `/panth-sitemap.xml`. Delegates to the BuilderInterface to
- * generate the XML body. Falls back to the first Magento sitemap file for the
- * current store so the URL always resolves.
- */
 class Index implements HttpGetActionInterface
 {
     public function __construct(

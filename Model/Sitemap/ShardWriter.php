@@ -3,10 +3,6 @@ declare(strict_types=1);
 
 namespace Panth\XmlSitemap\Model\Sitemap;
 
-/**
- * Streaming XMLWriter wrapper for a single sitemap-N.xml shard.
- * Never buffers URLs in memory — writes directly to disk.
- */
 class ShardWriter
 {
     private \XMLWriter $writer;
@@ -14,14 +10,6 @@ class ShardWriter
     private bool $open = false;
     private string $path;
 
-    /**
-     * @param string              $path    Absolute file path for the shard XML.
-     * @param string|null         $xslHref Optional relative href for an xml-stylesheet processing instruction.
-     * @param array<string,mixed> $options Optional namespace toggles:
-     *                                     - include_hreflang (bool) → emit xmlns:xhtml
-     *                                     - include_video    (bool) → emit xmlns:video
-     *                                     Defaults to emitting both for back-compat.
-     */
     public function open(string $path, ?string $xslHref = null, array $options = []): void
     {
         $this->path = $path;
@@ -56,9 +44,6 @@ class ShardWriter
         $this->count = 0;
     }
 
-    /**
-     * @param array<string,mixed> $url
-     */
     public function writeUrl(array $url): void
     {
         if (!$this->open) {
@@ -74,10 +59,7 @@ class ShardWriter
         if (!empty($url['lastmod'])) {
             $w->writeElement('lastmod', (string) $url['lastmod']);
         }
-        // <changefreq> and <priority> intentionally omitted — Google ignores
-        // both fields when scheduling crawls (Mueller, GSC docs) and Bing
-        // treats them as soft hints. Keeping them inflated every shard by
-        // ~30–40% for zero ranking benefit.
+
         if (!empty($url['images']) && is_array($url['images'])) {
             foreach ($url['images'] as $img) {
                 if (!is_array($img) || empty($img['loc'])) {
@@ -125,7 +107,7 @@ class ShardWriter
                 $w->endElement();
             }
         }
-        $w->endElement(); // url
+        $w->endElement();
         $this->count++;
     }
 
@@ -134,7 +116,7 @@ class ShardWriter
         if (!$this->open) {
             return $this->path;
         }
-        $this->writer->endElement(); // urlset
+        $this->writer->endElement();
         $this->writer->endDocument();
         $this->writer->flush();
         unset($this->writer);
@@ -152,16 +134,12 @@ class ShardWriter
         return $this->path;
     }
 
-    /**
-     * Get the current file size in bytes.
-     * Returns 0 if the file has not been written yet.
-     */
     public function getFileSize(): int
     {
         if (!$this->open) {
             return file_exists($this->path) ? (int) filesize($this->path) : 0;
         }
-        // Flush the writer to get an accurate file size
+
         $this->writer->flush();
         return file_exists($this->path) ? (int) filesize($this->path) : 0;
     }

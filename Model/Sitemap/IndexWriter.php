@@ -3,15 +3,8 @@ declare(strict_types=1);
 
 namespace Panth\XmlSitemap\Model\Sitemap;
 
-/**
- * Writes sitemap_index.xml referencing all shard files.
- */
 class IndexWriter
 {
-    /**
-     * @param array<int,array{loc:string,lastmod?:string}> $shards
-     * @param string|null $xslHref  Relative XSL filename to reference, or null to skip
-     */
     public function write(string $path, array $shards, ?string $xslHref = null): string
     {
         $dir = dirname($path);

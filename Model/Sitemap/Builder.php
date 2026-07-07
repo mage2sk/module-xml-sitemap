@@ -14,41 +14,23 @@ use Panth\XmlSitemap\Helper\Config;
 use Panth\XmlSitemap\Helper\PathResolver;
 use Psr\Log\LoggerInterface;
 
-/**
- * Streaming sitemap builder. Iterates contributors, writes shards at
- * shard_size boundary, emits sitemap_index.xml. Never buffers full lists.
- *
- * Output directory: pub/xmlsitemap/<store_code>/ (kept distinct from
- * pub/sitemap so an autoindex-off nginx never 403s another module's
- * /sitemap route by serving this directory).
- *
- * When `panth_xml_sitemap/generation/xsl_enabled` is active, writes a human-readable XSL
- * stylesheet next to the shard files and references it via an
- * `<?xml-stylesheet?>` processing instruction in every shard.
- */
 class Builder implements BuilderInterface
 {
     private const XSL_FILENAME = 'sitemap-style.xsl';
 
-    /** Max sitemap file size per Google spec: 50 MB */
     private const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 
-    /** Entity type to file prefix mapping */
     private const ENTITY_PREFIX_MAP = [
         'product'      => 'sitemap-products',
         'category'     => 'sitemap-categories',
         'cms_page'     => 'sitemap-cms',
         'custom'       => 'sitemap-custom',
-        // Optional integrations — own shard prefixes so the merchant
-        // can spot them at a glance in the file list.
+
         'testimonial'  => 'sitemap-testimonials',
         'faq'          => 'sitemap-faqs',
         'dynamic_form' => 'sitemap-dynamic-forms',
     ];
 
-    /**
-     * @param array<string,ContributorInterface> $contributors
-     */
     public function __construct(
         private readonly StoreManagerInterface $storeManager,
         private readonly Filesystem $filesystem,
@@ -73,20 +55,16 @@ class Builder implements BuilderInterface
         $baseUrl   = rtrim((string) $store->getBaseUrl(), '/');
 
         $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
-        // Distinct prefix so we never create pub/sitemap/, which would
-        // be served as a directory by nginx and 403 the bare /sitemap
-        // URL that the HTML sitemap router owns.
+
         $relDir = 'xmlsitemap/' . $storeCode;
         $pub->create($relDir);
         $absDir = $pub->getAbsolutePath($relDir);
 
-        // Clean old shard files for this store (keep directory)
         foreach (glob(rtrim($absDir, '/') . '/sitemap-*.xml') ?: [] as $old) {
             if (file_exists($old)) {
                 try {
                     unlink($old);
                 } catch (\Throwable) {
-                    // Best-effort cleanup
                 }
             }
         }
@@ -95,11 +73,9 @@ class Builder implements BuilderInterface
             try {
                 unlink($indexFile);
             } catch (\Throwable) {
-                // Best-effort cleanup
             }
         }
 
-        // XSL stylesheet support
         $xslEnabled = $this->config->isSitemapXslEnabled($storeId);
         $xslHref    = $xslEnabled ? self::XSL_FILENAME : null;
 
@@ -107,7 +83,6 @@ class Builder implements BuilderInterface
             $this->writeXslStylesheet($absDir);
         }
 
-        /** @var array<int,array{loc:string,lastmod:string}> $shards */
         $shards = [];
         $files  = [];
 
@@ -150,10 +125,7 @@ class Builder implements BuilderInterface
                         if (!is_array($url) || empty($url['loc'])) {
                             continue;
                         }
-                        // Normalise the URL one final time before it
-                        // gets pinned into a sitemap file — guarantees
-                        // no `//` ever lands in <loc> regardless of
-                        // contributor-side path concat oddities.
+
                         $url['loc'] = $this->pathResolver->normaliseUrl((string) $url['loc']);
                         if ($shard === null) {
                             $openShard();
@@ -179,11 +151,9 @@ class Builder implements BuilderInterface
 
             $this->deltaTracker->mark($storeId, $now);
 
-            // Ping search engines if enabled
             if (!empty($shards)) {
                 $sitemapUrl = $shards[0]['loc'] ?? '';
                 if (count($shards) > 1) {
-                    // Use the sitemap index URL when multiple shards exist
                     $sitemapUrl = $this->pathResolver->buildSitemapUrl($baseUrl, $relDirForLegacy);
                 }
                 $this->pingSearchEngines($storeId, $sitemapUrl);
@@ -194,7 +164,6 @@ class Builder implements BuilderInterface
                 try {
                     $shard->close();
                 } catch (\Throwable) {
-                    // ignore
                 }
             }
             throw $e;
@@ -203,12 +172,6 @@ class Builder implements BuilderInterface
         return $files;
     }
 
-    /**
-     * Build sitemap for the given store and return the XML body as a string.
-     *
-     * Iterates all contributors and produces a single in-memory urlset document
-     * so the frontend controller can serve it without writing files to disk.
-     */
     public function buildForStore(int $storeId): string
     {
         $store   = $this->storeManager->getStore($storeId);
@@ -216,10 +179,6 @@ class Builder implements BuilderInterface
 
         $xslEnabled = $this->config->isSitemapXslEnabled($storeId);
 
-        // Load the active profile for this store (store-specific first, then
-        // the "All Stores" profile) so the live `/panth-sitemap.xml` endpoint
-        // respects the same entity_types / flags / custom_links the CLI
-        // generator uses.
         $profile       = $this->loadActiveProfileForStore($storeId);
         $allowedBuckets = $this->resolveEntityBuckets(
             (string) ($profile['entity_types'] ?? '')
@@ -296,8 +255,7 @@ class Builder implements BuilderInterface
                         continue;
                     }
                     $loc = $this->pathResolver->normaliseUrl((string) $url['loc']);
-                    // Dedup across contributors so CMS + LandingPage + Blog
-                    // can't emit the same URL twice.
+
                     if ($loc === '' || isset($seenLocs[$loc])) {
                         continue;
                     }
@@ -307,9 +265,7 @@ class Builder implements BuilderInterface
                     if (!empty($url['lastmod'])) {
                         $xml->writeElement('lastmod', (string) $url['lastmod']);
                     }
-                    // <changefreq> and <priority> intentionally omitted — Google ignores
-                    // both fields and Bing treats them as soft hints. Matches the
-                    // shard writer behaviour for the on-disk variant.
+
                     if (!empty($url['images']) && is_array($url['images'])) {
                         foreach ($url['images'] as $img) {
                             if (!is_array($img) || empty($img['loc'])) {
@@ -357,7 +313,7 @@ class Builder implements BuilderInterface
                             $xml->endElement();
                         }
                     }
-                    $xml->endElement(); // url
+                    $xml->endElement();
                 }
             } catch (\Throwable $e) {
                 $this->logger->error(
@@ -366,9 +322,6 @@ class Builder implements BuilderInterface
             }
         }
 
-        // Emit profile-configured custom_links + additional_links system-config
-        // after contributor URLs so `/panth-sitemap.xml` matches what the CLI
-        // writes when 'custom' is selected in entity_types.
         if ($allowedBuckets === null || isset($allowedBuckets['custom'])) {
             $customLinks = $profile ? $this->resolveCustomLinks($profile, $baseUrl) : [];
             foreach ($customLinks as $link) {
@@ -379,28 +332,17 @@ class Builder implements BuilderInterface
                 $seenLocs[$loc] = true;
                 $xml->startElement('url');
                 $xml->writeElement('loc', $loc);
-                // <changefreq>/<priority> intentionally omitted — see ShardWriter.
+
                 $xml->endElement();
             }
         }
 
-        $xml->endElement(); // urlset
+        $xml->endElement();
         $xml->endDocument();
 
         return $xml->outputMemory();
     }
 
-    /**
-     * Load the active sitemap profile for a given store. Prefers a profile
-     * whose `store_id` matches exactly, falls back to the "All Stores"
-     * profile (`store_id = 0`). Returns null when neither exists.
-     *
-     * Used by `buildForStore` so the live `/panth-sitemap.xml` endpoint
-     * honours the same entity_types / flags / custom_links the CLI
-     * generator applies from `buildFromProfile`.
-     *
-     * @return array<string,mixed>|null
-     */
     private function loadActiveProfileForStore(int $storeId): ?array
     {
         try {
@@ -424,15 +366,6 @@ class Builder implements BuilderInterface
         }
     }
 
-    /**
-     * Build sitemaps from a sitemap profile configuration.
-     *
-     * Generates separate files per entity type and combines them into sitemap_index.xml.
-     * Respects profile settings for exclusions, images, changefreq, priority, and max URLs.
-     *
-     * @param array $profile Row from panth_seo_sitemap_profile table
-     * @return array{url_count: int, file_count: int, generation_time: float, files: list<string>}
-     */
     public function buildFromProfile(array $profile): array
     {
         $startTime = microtime(true);
@@ -447,10 +380,6 @@ class Builder implements BuilderInterface
             $maxUrlsPerFile = 50000;
         }
 
-        // Profile-level settings. `include_hreflang_tags` / `include_video_sitemap`
-        // gate the xhtml/video xmlns declarations in the generated shards, and
-        // `priority_homepage` overrides the hard-coded 1.0 default in
-        // ProductContributor::homepage-optimisation branch.
         $profileConfig = [
             'exclude_out_of_stock'     => (bool) ($profile['exclude_out_of_stock'] ?? false),
             'exclude_noindex'          => (bool) ($profile['exclude_noindex'] ?? false),
@@ -463,12 +392,8 @@ class Builder implements BuilderInterface
                 : null,
         ];
 
-        // Per-entity changefreq/priority from profile (JSON-decoded or direct columns)
         $entitySettings = $this->resolveEntitySettings($profile);
 
-        // Resolve the output directory through PathResolver so empty
-        // input lands at pub/ root (clean `/sitemap_index.xml` URL) and
-        // any stray slashes are collapsed exactly once.
         $outputPath = (string) ($profile['output_path'] ?? '');
         $profileDir = $this->pathResolver->resolveRelativeDir($outputPath, $storeCode);
         $pub = $this->filesystem->getDirectoryWrite(DirectoryList::PUB);
@@ -479,13 +404,11 @@ class Builder implements BuilderInterface
             $absDir = $pub->getAbsolutePath();
         }
 
-        // Clean old shard files for this profile
         foreach (glob(rtrim($absDir, '/') . '/sitemap-*.xml') ?: [] as $old) {
             if (file_exists($old)) {
                 try {
                     unlink($old);
                 } catch (\Throwable) {
-                    // Best-effort cleanup
                 }
             }
         }
@@ -494,11 +417,9 @@ class Builder implements BuilderInterface
             try {
                 unlink($indexFile);
             } catch (\Throwable) {
-                // Best-effort cleanup
             }
         }
 
-        // XSL stylesheet support
         $xslEnabled = $this->config->isSitemapXslEnabled($storeId);
         $xslHref    = $xslEnabled ? self::XSL_FILENAME : null;
 
@@ -508,12 +429,10 @@ class Builder implements BuilderInterface
 
         $now = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:sP');
 
-        /** @var array<int,array{loc:string,lastmod:string}> $indexEntries */
         $indexEntries  = [];
         $allFiles      = [];
         $totalUrlCount = 0;
 
-        // Map contributor codes to entity type prefixes
         $contributorEntityMap = [
             'product'      => 'product',
             'category'     => 'category',
@@ -523,12 +442,6 @@ class Builder implements BuilderInterface
             'dynamic_form' => 'dynamic_form',
         ];
 
-        // Profile-level entity-type filter. Empty = include everything (back-compat).
-        // Contributors not mapped into one of the admin buckets
-        // (product / category / cms / custom / testimonial / faq) are
-        // treated as always-on decorators (hreflang, image, video
-        // additions run alongside their host entity) and skipped from
-        // this gating.
         $allowedBuckets = $this->resolveEntityBuckets((string) ($profile['entity_types'] ?? ''));
         $contributorBucketMap = [
             'product'       => 'product',
@@ -540,7 +453,6 @@ class Builder implements BuilderInterface
             'faq'           => 'faq',
         ];
 
-        // Generate files per contributor (each entity type gets its own shard series)
         foreach ($this->contributors as $contributor) {
             if (!$contributor instanceof ContributorInterface) {
                 continue;
@@ -557,7 +469,6 @@ class Builder implements BuilderInterface
                 }
             }
 
-            // Build config for this contributor from profile
             $contributorConfig = $profileConfig;
             if (isset($entitySettings[$entityType])) {
                 $contributorConfig = array_merge($contributorConfig, $entitySettings[$entityType]);
@@ -587,8 +498,6 @@ class Builder implements BuilderInterface
             }
         }
 
-        // Handle custom links from profile, gated on the profile's entity_types
-        // when the filter is set ('custom' must be one of the allowed buckets).
         $customLinks = ($allowedBuckets === null || isset($allowedBuckets['custom']))
             ? $this->resolveCustomLinks($profile, $baseUrl)
             : [];
@@ -608,7 +517,6 @@ class Builder implements BuilderInterface
             $totalUrlCount += $result['url_count'];
         }
 
-        // Write sitemap_index.xml
         if (!empty($indexEntries)) {
             $this->indexWriter->write($indexFile, $indexEntries, $xslHref);
             $allFiles[] = $indexFile;
@@ -616,7 +524,6 @@ class Builder implements BuilderInterface
 
         $this->deltaTracker->mark($storeId, $now);
 
-        // Ping search engines
         if (!empty($indexEntries)) {
             $sitemapUrl = $this->pathResolver->buildSitemapUrl($baseUrl, $profileDir);
             $this->pingSearchEngines($storeId, $sitemapUrl);
@@ -632,11 +539,6 @@ class Builder implements BuilderInterface
         ];
     }
 
-    /**
-     * Write shard files for a single entity type contributor.
-     *
-     * @return array{shards: list<array{loc:string,lastmod:string}>, files: list<string>, url_count: int}
-     */
     private function writeEntityShards(
         ContributorInterface $contributor,
         int $storeId,
@@ -656,8 +558,6 @@ class Builder implements BuilderInterface
         $shardUrlCount = 0;
         $shard    = null;
 
-        // Propagate hreflang + video xmlns toggles from the profile config
-        // so the resulting shards only declare the namespaces they actually use.
         $shardOptions = [
             'include_hreflang' => (bool) ($config['include_hreflang_tags'] ?? true),
             'include_video'    => (bool) ($config['include_video_sitemap'] ?? true),
@@ -690,11 +590,9 @@ class Builder implements BuilderInterface
             if (!is_array($url) || empty($url['loc'])) {
                 continue;
             }
-            // Final URL normalisation — collapses any `//` introduced
-            // upstream by contributors that did their own concat.
+
             $url['loc'] = $this->pathResolver->normaliseUrl((string) $url['loc']);
 
-            // Ensure lastmod is present (Google 2026 best practice)
             if (empty($url['lastmod'])) {
                 $url['lastmod'] = $now;
             }
@@ -707,7 +605,6 @@ class Builder implements BuilderInterface
             $shardUrlCount++;
             $urlCount++;
 
-            // Check URL count limit and file size limit (50MB)
             if ($shardUrlCount >= $maxUrlsPerFile
                 || $shard->getFileSize() >= self::MAX_FILE_SIZE_BYTES
             ) {
@@ -724,12 +621,6 @@ class Builder implements BuilderInterface
         ];
     }
 
-    /**
-     * Write shard files for custom links.
-     *
-     * @param list<array{loc:string,changefreq?:string,priority?:float}> $links
-     * @return array{shards: list<array{loc:string,lastmod:string}>, files: list<string>, url_count: int}
-     */
     private function writeCustomLinkShards(
         array $links,
         string $absDir,
@@ -751,8 +642,6 @@ class Builder implements BuilderInterface
         $defaultChangefreq = $entitySettings['changefreq'] ?? 'weekly';
         $defaultPriority   = isset($entitySettings['priority']) ? (float) $entitySettings['priority'] : 0.5;
 
-        // Custom links never carry image/hreflang/video extensions; skip the
-        // auxiliary xmlns declarations to keep the shard minimal.
         $customShardOptions = ['include_hreflang' => false, 'include_video' => false];
 
         $openShard = function () use (&$shard, &$shardIdx, &$shardUrlCount, $absDir, $prefix, $xslHref, $customShardOptions): void {
@@ -814,17 +703,8 @@ class Builder implements BuilderInterface
         ];
     }
 
-    /**
-     * Resolve per-entity changefreq/priority settings from profile data.
-     *
-     * Supports both JSON-encoded `entity_settings` column and direct columns like
-     * `product_changefreq`, `product_priority`, `category_changefreq`, etc.
-     *
-     * @return array<string, array{changefreq?: string, priority?: float}>
-     */
     private function resolveEntitySettings(array $profile): array
     {
-        // Try JSON column first
         if (!empty($profile['entity_settings'])) {
             $decoded = is_string($profile['entity_settings'])
                 ? json_decode($profile['entity_settings'], true)
@@ -834,12 +714,8 @@ class Builder implements BuilderInterface
             }
         }
 
-        // Fall back to direct columns
-        // Supports both naming conventions:
-        //   product_changefreq / product_priority  (table schema)
-        //   changefreq_product / priority_product   (actual DB columns)
         $settings = [];
-        // Map entity types to their possible short names in DB columns
+
         $types = [
             'product'  => ['product'],
             'category' => ['category'],
@@ -850,10 +726,9 @@ class Builder implements BuilderInterface
             $cf = null;
             $pr = null;
             foreach ($aliases as $alias) {
-                // Convention 1: <alias>_changefreq / <alias>_priority
                 $cf = $cf ?? ($profile[$alias . '_changefreq'] ?? null);
                 $pr = $pr ?? ($profile[$alias . '_priority'] ?? null);
-                // Convention 2: changefreq_<alias> / priority_<alias>
+
                 $cf = $cf ?? ($profile['changefreq_' . $alias] ?? null);
                 $pr = $pr ?? ($profile['priority_' . $alias] ?? null);
             }
@@ -873,21 +748,6 @@ class Builder implements BuilderInterface
         return $settings;
     }
 
-    /**
-     * Parse custom links from the profile.
-     *
-     * @return list<array{loc:string, changefreq?:string, priority?:float}>
-     */
-    /**
-     * Parse the profile's `entity_types` multiselect value into a set of
-     * allowed admin buckets (product / category / cms / custom).
-     *
-     * Returns null when the filter is empty — meaning "include everything"
-     * (back-compat for profiles seeded before the filter landed). Otherwise
-     * returns a map where keys are the allowed buckets.
-     *
-     * @return array<string,true>|null
-     */
     private function resolveEntityBuckets(string $entityTypes): ?array
     {
         $trimmed = trim($entityTypes);
@@ -908,17 +768,11 @@ class Builder implements BuilderInterface
             return [];
         }
 
-        // Try JSON first
         if (is_string($raw)) {
             $decoded = json_decode($raw, true);
             if (is_array($decoded)) {
                 $raw = $decoded;
             } else {
-                // Newline-separated. Each line is either
-                //   https://example.com/path
-                // or a 2-3-column CSV
-                //   https://example.com/path,weekly,0.7
-                // (changefreq + priority are optional).
                 $lines = array_filter(array_map('trim', explode("\n", $raw)));
                 $links = [];
                 foreach ($lines as $line) {
@@ -977,19 +831,11 @@ class Builder implements BuilderInterface
         return [];
     }
 
-    /**
-     * Load a sitemap profile from the database by ID.
-     *
-     * Creates the profile table if it does not yet exist.
-     *
-     * @return array|null Profile row or null if not found
-     */
     public function loadProfile(int $profileId): ?array
     {
         $conn  = $this->resourceConnection->getConnection();
         $table = $this->resourceConnection->getTableName('panth_seo_sitemap_profile');
 
-        // Ensure table exists
         if (!$conn->isTableExists($table)) {
             $this->ensureProfileTable($conn, $table);
         }
@@ -1000,11 +846,6 @@ class Builder implements BuilderInterface
         return is_array($row) && !empty($row) ? $row : null;
     }
 
-    /**
-     * Load all active profiles, optionally filtered by store.
-     *
-     * @return list<array>
-     */
     public function loadActiveProfiles(?int $storeId = null, bool $cronOnly = false): array
     {
         $conn  = $this->resourceConnection->getConnection();
@@ -1026,9 +867,6 @@ class Builder implements BuilderInterface
         return is_array($rows) ? $rows : [];
     }
 
-    /**
-     * Update profile row with generation stats.
-     */
     public function updateProfileStats(int $profileId, array $stats): void
     {
         $conn  = $this->resourceConnection->getConnection();
@@ -1046,9 +884,6 @@ class Builder implements BuilderInterface
         ], ['profile_id = ?' => $profileId]);
     }
 
-    /**
-     * Create the panth_seo_sitemap_profile table if it does not exist.
-     */
     private function ensureProfileTable($conn, string $table): void
     {
         $sql = "CREATE TABLE IF NOT EXISTS `{$table}` (
@@ -1087,9 +922,6 @@ class Builder implements BuilderInterface
         $conn->query($sql);
     }
 
-    /**
-     * Ping Google and/or Bing with the sitemap URL after a successful build.
-     */
     private function pingSearchEngines(int $storeId, string $sitemapUrl): void
     {
         if ($sitemapUrl === '') {
@@ -1117,9 +949,6 @@ class Builder implements BuilderInterface
         }
     }
 
-    /**
-     * Write the XSL stylesheet file into the sitemap output directory.
-     */
     private function writeXslStylesheet(string $absDir): void
     {
         $xslPath = rtrim($absDir, '/') . '/' . self::XSL_FILENAME;

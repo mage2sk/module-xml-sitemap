@@ -11,17 +11,6 @@ use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
-/**
- * Creates the `in_xml_sitemap` EAV attribute for both catalog_product and
- * catalog_category entities, allowing merchants to exclude individual
- * products or categories from the generated XML sitemap.
- *
- * Attribute details:
- *  - Type: int (boolean)
- *  - Default: 1 (included in sitemap)
- *  - Group: "Search Engine Optimization"
- *  - Visible in admin forms
- */
 class AddExclusionAttributes implements DataPatchInterface
 {
     public function __construct(
@@ -34,10 +23,8 @@ class AddExclusionAttributes implements DataPatchInterface
     {
         $this->moduleDataSetup->startSetup();
 
-        /** @var EavSetup $eavSetup */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
-        // ── Product attribute ───────────────────────────────────────
         if (!$eavSetup->getAttributeId(Product::ENTITY, 'in_xml_sitemap')) {
             $eavSetup->addAttribute(
                 Product::ENTITY,
@@ -67,10 +54,8 @@ class AddExclusionAttributes implements DataPatchInterface
             );
         }
 
-        // Add product in_xml_sitemap to ALL product attribute sets
         $this->addProductAttributeToAllSets($eavSetup, 'in_xml_sitemap');
 
-        // ── Category attribute ──────────────────────────────────────
         if (!$eavSetup->getAttributeId(Category::ENTITY, 'in_xml_sitemap')) {
             $eavSetup->addAttribute(
                 Category::ENTITY,
@@ -91,7 +76,6 @@ class AddExclusionAttributes implements DataPatchInterface
             );
         }
 
-        // Add category in_xml_sitemap to ALL category attribute sets
         $this->addCategoryAttributeToAllSets($eavSetup, 'in_xml_sitemap');
 
         $this->moduleDataSetup->endSetup();
@@ -99,10 +83,6 @@ class AddExclusionAttributes implements DataPatchInterface
         return $this;
     }
 
-    /**
-     * Assign a product attribute to ALL existing attribute sets under the
-     * "Search Engine Optimization" group (falls back to the default group).
-     */
     private function addProductAttributeToAllSets(EavSetup $eavSetup, string $attributeCode): void
     {
         $entityTypeId   = $eavSetup->getEntityTypeId(Product::ENTITY);
@@ -122,10 +102,6 @@ class AddExclusionAttributes implements DataPatchInterface
         }
     }
 
-    /**
-     * Assign a category attribute to ALL existing attribute sets under the
-     * "Search Engine Optimization" group (falls back to the default group).
-     */
     private function addCategoryAttributeToAllSets(EavSetup $eavSetup, string $attributeCode): void
     {
         $entityTypeId   = $eavSetup->getEntityTypeId(Category::ENTITY);
@@ -145,17 +121,11 @@ class AddExclusionAttributes implements DataPatchInterface
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getDependencies(): array
     {
         return [];
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getAliases(): array
     {
         return [];

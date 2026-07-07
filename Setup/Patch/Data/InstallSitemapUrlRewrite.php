@@ -7,12 +7,6 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-/**
- * Installs one `url_rewrite` row per store view so `/panth-sitemap.xml`
- * resolves to our frontend controller (`xml_sitemap/sitemap/index`).
- * Inserts are idempotent: the same row is skipped on rerun by the
- * composite unique key on (store_id, request_path).
- */
 class InstallSitemapUrlRewrite implements DataPatchInterface
 {
     private const REQUEST_PATH = 'panth-sitemap.xml';

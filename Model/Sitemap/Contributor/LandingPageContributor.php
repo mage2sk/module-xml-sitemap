@@ -7,15 +7,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Panth\StructuredData\Model\LandingPage\LandingPageDetector;
 use Panth\XmlSitemap\Api\ContributorInterface;
 
-/**
- * Sitemap contributor for landing pages.
- *
- * Emits URLs for CMS pages identified as landing pages with a higher priority
- * (0.8) than regular CMS pages (0.5). Landing pages included here are excluded
- * from the regular CmsPageContributor by identifier overlap; the sitemap
- * builder deduplicates URLs by `loc`, so even if both contributors emit the
- * same URL the higher priority wins.
- */
 class LandingPageContributor implements ContributorInterface
 {
     private const PRIORITY   = 0.8;
@@ -55,7 +46,6 @@ class LandingPageContributor implements ContributorInterface
                     $entry['lastmod'] = (new \DateTimeImmutable((string) $row['update_time']))
                         ->format('Y-m-d\TH:i:sP');
                 } catch (\Throwable) {
-                    // Ignore malformed dates.
                 }
             }
 

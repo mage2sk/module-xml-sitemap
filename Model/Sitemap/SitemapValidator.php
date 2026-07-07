@@ -5,42 +5,24 @@ namespace Panth\XmlSitemap\Model\Sitemap;
 
 use Magento\Store\Model\StoreManagerInterface;
 
-/**
- * Validates generated sitemap files against the Sitemaps protocol constraints:
- *
- *  - Well-formed XML (libxml)
- *  - URL count must be < 50 000 per file
- *  - Uncompressed file size must be < 50 MB
- *  - Every <loc> value must start with the site's base URL
- */
 class SitemapValidator
 {
-    /** @see https://www.sitemaps.org/protocol.html */
     private const MAX_URLS      = 50_000;
-    private const MAX_FILE_SIZE = 52_428_800; // 50 MB
+    private const MAX_FILE_SIZE = 52_428_800;
 
     public function __construct(
         private readonly StoreManagerInterface $storeManager
     ) {
     }
 
-    /**
-     * Validate a sitemap XML file and return an array of error strings.
-     *
-     * An empty array means the file is valid.
-     *
-     * @return string[]
-     */
     public function validate(string $filePath): array
     {
         $errors = [];
 
-        // ── File existence ──────────────────────────────────────────
         if (!is_file($filePath) || !is_readable($filePath)) {
             return ['Sitemap file does not exist or is not readable: ' . $filePath];
         }
 
-        // ── File size ───────────────────────────────────────────────
         $fileSize = filesize($filePath);
         if ($fileSize === false) {
             $errors[] = 'Unable to determine file size for: ' . $filePath;
@@ -52,7 +34,6 @@ class SitemapValidator
             );
         }
 
-        // ── Well-formed XML (libxml) ────────────────────────────────
         $previousUseErrors = libxml_use_internal_errors(true);
         libxml_clear_errors();
 
@@ -73,7 +54,7 @@ class SitemapValidator
                     trim($libxmlError->message)
                 );
             }
-            // Cannot continue further checks without valid XML
+
             return $errors;
         }
 
@@ -88,7 +69,6 @@ class SitemapValidator
             }
         }
 
-        // ── URL count ───────────────────────────────────────────────
         $xpath    = new \DOMXPath($xml);
         $xpath->registerNamespace('sm', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $locNodes = $xpath->query('//sm:url/sm:loc');
@@ -100,7 +80,6 @@ class SitemapValidator
             );
         }
 
-        // ── Base URL check ──────────────────────────────────────────
         $baseUrls = $this->collectBaseUrls();
 
         if ($locNodes !== false && $baseUrls !== []) {
@@ -130,11 +109,6 @@ class SitemapValidator
         return $errors;
     }
 
-    /**
-     * Collect base URLs from all stores so we can validate <loc> values.
-     *
-     * @return string[]
-     */
     private function collectBaseUrls(): array
     {
         $urls = [];
@@ -146,7 +120,6 @@ class SitemapValidator
                 }
             }
         } catch (\Throwable) {
-            // StoreManager may throw during CLI setup; degrade gracefully
         }
 
         return array_values($urls);
