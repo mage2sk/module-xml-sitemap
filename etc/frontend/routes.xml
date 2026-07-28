@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Panth XML Sitemap — Frontend router.
+ * Panth XML Sitemap - Frontend router.
  *
  * The frontName `xml_sitemap` is wired up so `/xml_sitemap/sitemap/index`
  * reaches `Controller/Sitemap/Index.php`. To have `/sitemap.xml` map here we
- * rely on a `url_rewrite` row installed via the data patch — that combination
+ * rely on a `url_rewrite` row installed via the data patch - that combination
  * matches the approach used in Panth_AdvancedSEO and works across Hyva/Luma.
  */
 -->

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Panth XML Sitemap — Default config values.
+ * Panth XML Sitemap - Default config values.
  *
  * The section id `panth_xml_sitemap` is deliberately scoped off so this module
  * can coexist with Panth_AdvancedSEO's `panth_seo` section without colliding.

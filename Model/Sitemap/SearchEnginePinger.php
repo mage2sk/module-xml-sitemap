@@ -61,7 +61,7 @@ class SearchEnginePinger
 
                 $this->logger->info(
                     sprintf(
-                        '[PanthSEO] sitemap ping to %s: HTTP %d (%s) — %s',
+                        '[PanthSEO] sitemap ping to %s: HTTP %d (%s) - %s',
                         $engine,
                         $status,
                         $success ? 'OK' : 'FAIL',
@@ -76,7 +76,7 @@ class SearchEnginePinger
 
                 $this->logger->error(
                     sprintf(
-                        '[PanthSEO] sitemap ping to %s failed: %s — %s',
+                        '[PanthSEO] sitemap ping to %s failed: %s - %s',
                         $engine,
                         $e->getMessage(),
                         $pingUrl

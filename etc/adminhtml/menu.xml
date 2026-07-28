@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Panth XML Sitemap — Admin menu entries. Two links under Panth Infotech:
+ * Panth XML Sitemap - Admin menu entries. Two links under Panth Infotech:
  *   - Sitemap Profiles grid (CRUD for sitemap profile rows)
  *   - Configuration (jumps to the system.xml section)
  */

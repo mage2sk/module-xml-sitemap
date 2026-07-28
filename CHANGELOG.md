@@ -4,6 +4,12 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.25]
+
+### Changed
+
+- Replaced typographic characters (em dashes, curly quotes, ellipsis) with plain ASCII punctuation. No functional changes.
+
 ## [1.0.24] - 2026-07-07
 
 ### Changed
@@ -21,13 +27,13 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - **Default profile output_path no longer shadows the `/sitemap` URL
-  another module owns.** The previous default — `sitemap/<store_code>`
+  another module owns.** The previous default - `sitemap/<store_code>`
   (and `sitemap/panth/<store_code>/` in the legacy non-profile build
-  path) — created a real `pub/sitemap/` directory. Under the standard
+  path) - created a real `pub/sitemap/` directory. Under the standard
   Magento nginx config (`location / { try_files $uri $uri/ /index.php$is_args$args; }`)
   nginx prefers the directory match over the index.php fallback, so
   a bare `/sitemap` request lands on `pub/sitemap/` and returns
-  `403 Forbidden` (autoindex is typically off) — the request never
+  `403 Forbidden` (autoindex is typically off) - the request never
   reaches Magento, so any frontend router that owned `/sitemap`
   (for example an HTML sitemap landing page) is shadowed.
 
@@ -35,18 +41,18 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 - New default output_path is `xmlsitemap/<store_code>/`, applied
   consistently across:
-  - `etc/db_schema.xml` — `output_path` column default
-  - `Model/Profile.php` — `getOutputPath()` fallback
-  - `Controller/Adminhtml/Profile/Save.php` — empty-input fallback
+  - `etc/db_schema.xml` - `output_path` column default
+  - `Model/Profile.php` - `getOutputPath()` fallback
+  - `Controller/Adminhtml/Profile/Save.php` - empty-input fallback
   - `Ui/Component/Form/DataProvider/ProfileFormDataProvider.php`
-    — UI placeholder for new-profile creation
-  - `Model/Sitemap/Builder.php` — legacy non-profile generator
+    - UI placeholder for new-profile creation
+  - `Model/Sitemap/Builder.php` - legacy non-profile generator
 - Existing profiles with a custom `output_path` keep their configured
   value untouched. Profiles still on the old default that want to
   reclaim `/sitemap` should re-save the profile (the new default
   fills in) or manually move their `output_path` to `xmlsitemap/{store_code}/`.
 
-## [1.0.21] — 2026-05-13
+## [1.0.21] - 2026-05-13
 
 ### Fixed
 
@@ -78,7 +84,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   and pulled in a sibling-module helper that doesn't have to be
   present.
 
-## [1.0.20] — 2026-05-13
+## [1.0.20] - 2026-05-13
 
 ### Fixed
 
@@ -106,16 +112,16 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 - URL suffix (`catalog/seo/product_url_suffix`,
   `catalog/seo/category_url_suffix`) continues to be honoured via
-  `url_rewrite.request_path` — there is no second source of truth.
+  `url_rewrite.request_path` - there is no second source of truth.
 
-## [1.0.19] — 2026-05-11
+## [1.0.19] - 2026-05-11
 
 ### Added
 
 - **Per-profile "Excluded CMS Identifiers" textarea** in the CMS Page
   Settings fieldset. Newline-separated identifiers listed here are
   dropped from the CMS shard regardless of the `exclude_noindex`
-  setting — belt-and-braces over the existing `panth_seo_resolved`
+  setting - belt-and-braces over the existing `panth_seo_resolved`
   noindex join. New and upgraded installs seed the column with
   `home`, `enable-cookies`, `privacy-policy-cookie-restriction-mode`,
   `no-route` so the CMS shard is clean on day one without depending
@@ -128,7 +134,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   overwrites NULL/empty rows so merchant customisations survive
   upgrade).
 
-## [1.0.7] — 2026-04-21
+## [1.0.7] - 2026-04-21
 
 ### Added
 
@@ -136,11 +142,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   walkthrough GIF. Screenshots enhanced via ImageMagick (shadow +
   1800px + quality 88). GIF is 4× speed, 12 fps, 2-pass ffmpeg palette.
 
-## [1.0.6] — 2026-04-21
+## [1.0.6] - 2026-04-21
 
 ### Changed
 
-- **Shorter default output path** — `sitemap/<store_code>/` instead of
+- **Shorter default output path** - `sitemap/<store_code>/` instead of
   `sitemap/panth/<store_code>/profile-N/`. The index file now lives one
   folder deep at `/sitemap/<store_code>/sitemap_index.xml`. Existing
   profiles with a non-empty `output_path` column keep using their
@@ -169,7 +175,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   `/sitemap/panth/<code>/sitemap-style.xsl`. Updated to match the new
   short output path.
 
-## [1.0.5] — 2026-04-21
+## [1.0.5] - 2026-04-21
 
 ### Added
 
@@ -184,7 +190,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   Previously hardcoded `sitemap/panth/<store>/profile-N/...`; now resolves
   `{store_code}` from the column when set.
 
-## [1.0.4] — 2026-04-21
+## [1.0.4] - 2026-04-21
 
 ### Fixed
 
@@ -212,11 +218,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   unused.** `ShardWriter` unconditionally emitted `xmlns:xhtml` and
   `xmlns:video` on every urlset. The writer's `open()` now accepts an
   options array and the two flags are plumbed through `buildFromProfile`
-  → `writeEntityShards` → `ShardWriter::open`. Custom-link shards always
+  -> `writeEntityShards` -> `ShardWriter::open`. Custom-link shards always
   opt out of both auxiliary namespaces since their URLs never carry
   hreflang or video data.
 
-## [1.0.3] — 2026-04-21
+## [1.0.3] - 2026-04-21
 
 ### Fixed
 
@@ -238,9 +244,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
     `additional/additional_links_priority`
 - `Model\Sitemap\SearchEnginePinger`, `VideoContributor`,
   `AdditionalLinksContributor` and `Builder` had the same stale paths
-  hard-coded in private consts / arrays — all rewritten to match.
+  hard-coded in private consts / arrays - all rewritten to match.
 
-## [1.0.2] — 2026-04-21
+## [1.0.2] - 2026-04-21
 
 ### Fixed
 
@@ -257,15 +263,15 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   integer `store_id = 0` (All Store Views) because its emptiness check
   trips on 0. Introduced `Panth\XmlSitemap\Ui\Component\Listing\Column\Store`
   that normalises `store_id` to a single-element array before delegating
-  to the parent renderer — same pattern Panth_Crosslinks uses.
+  to the parent renderer - same pattern Panth_Crosslinks uses.
 
-## [1.0.1] — 2026-04-21
+## [1.0.1] - 2026-04-21
 
 ### Fixed
 
 - Admin controllers under `Controller/Adminhtml/Profile/` referenced the
   pre-extraction `Panth\AdvancedSEO\Controller\Adminhtml\AbstractAction`
-  which no longer exists — admin CRUD pages failed to generate
+  which no longer exists - admin CRUD pages failed to generate
   interceptors during `setup:di:compile`. Each controller now extends
   the module-local `Panth\XmlSitemap\Controller\Adminhtml\AbstractAction`.
 - `Controller\Adminhtml\Profile\Rebuild` imported the renamed cron
@@ -273,7 +279,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   updated to `Panth\XmlSitemap\Cron\Rebuild` (aliased as `RebuildCron`
   to avoid the local class-name collision).
 
-## [1.0.0] — 2026-04-21
+## [1.0.0] - 2026-04-21
 
 ### Added
 
@@ -282,14 +288,14 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
   max URLs per file, gzip, hreflang, images, videos, auto-split, etc.)
 - 7 entity-type contributors: Product, Category, CmsPage, LandingPage,
   Blog, Video, AdditionalLinks + HreflangContributor + ImageContributor.
-- `Panth\XmlSitemap\Api\BuilderInterface` — shard-aware sitemap generator.
-- `Panth\XmlSitemap\Model\Sitemap\ShardWriter` — writes individual
-  sitemap shards, `IndexWriter` — writes the top-level sitemap index.
-- `DeltaTracker` — records last-modified timestamps so subsequent cron
+- `Panth\XmlSitemap\Api\BuilderInterface` - shard-aware sitemap generator.
+- `Panth\XmlSitemap\Model\Sitemap\ShardWriter` - writes individual
+  sitemap shards, `IndexWriter` - writes the top-level sitemap index.
+- `DeltaTracker` - records last-modified timestamps so subsequent cron
   runs only regenerate changed entities.
-- `SearchEnginePinger` — posts to Google / Bing ping endpoints on
+- `SearchEnginePinger` - posts to Google / Bing ping endpoints on
   successful generation.
-- `Cron\Rebuild` — nightly regeneration (default schedule `0 2 * * *`).
+- `Cron\Rebuild` - nightly regeneration (default schedule `0 2 * * *`).
 - Async shard generation via AMQP topic `panth_xml_sitemap.shard`.
 - CLI command `panth:seo:sitemap:generate [--profile-id=N]`.
 - Frontend endpoint `/panth-sitemap.xml` served by module controller

@@ -37,7 +37,7 @@ class Save extends AbstractAction implements HttpPostActionInterface
         $storeId = (int)($data['store_id'] ?? 0);
         if ($storeId <= 0) {
             $this->messageManager->addErrorMessage(
-                __('Pick a single store view — sitemap profiles are scoped per store view.')
+                __('Pick a single store view - sitemap profiles are scoped per store view.')
             );
             return $resultRedirect->setPath('*/*/edit', $id > 0 ? ['id' => $id] : []);
         }

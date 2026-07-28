@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Panth XML Sitemap — ACL
+ * Panth XML Sitemap - ACL
  *
  * Two-branch ACL: the Panth_Core::panth_extensions branch gates the direct
  * menu links (Sitemap Profiles grid), and the Magento_Config::config branch

@@ -64,7 +64,7 @@
                 <dataType>int</dataType>
                 <label translate="true">Store View</label>
                 <dataScope>store_id</dataScope>
-                <notice translate="true">Pick the single store view this profile belongs to. Each store view needs its own profile — generating one sitemap that covers all stores is intentionally not supported.</notice>
+                <notice translate="true">Pick the single store view this profile belongs to. Each store view needs its own profile - generating one sitemap that covers all stores is intentionally not supported.</notice>
                 <validation>
                     <rule name="required-entry" xsi:type="boolean">true</rule>
                 </validation>

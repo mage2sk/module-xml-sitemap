@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Panth XML Sitemap — Admin router declaration.
+ * Panth XML Sitemap - Admin router declaration.
  *
  * The frontName `panth_xml_sitemap` scopes every admin action under
  * /admin/panth_xml_sitemap/... so routes never collide with Panth_AdvancedSEO

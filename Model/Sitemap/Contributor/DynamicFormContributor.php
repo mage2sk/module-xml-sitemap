@@ -29,7 +29,7 @@ class DynamicFormContributor implements ContributorInterface
         try {
             $conn = $this->resource->getConnection();
         } catch (\Throwable $e) {
-            $this->logger->info('[Panth_XmlSitemap] dynamic-form contributor — db unavailable: ' . $e->getMessage());
+            $this->logger->info('[Panth_XmlSitemap] dynamic-form contributor - db unavailable: ' . $e->getMessage());
             return;
         }
 

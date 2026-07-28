@@ -32,7 +32,7 @@ class SitemapUrl extends Column
         foreach ($dataSource['data']['items'] as &$item) {
             $fileCount = (int) ($item['file_count'] ?? 0);
             if ($fileCount === 0) {
-                $item[$name] = '<span style="color:#9b9b9b;">—</span>';
+                $item[$name] = '<span style="color:#9b9b9b;">-</span>';
                 continue;
             }
             $url = $this->buildUrl($item);

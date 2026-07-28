@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Panth XML Sitemap — System configuration.
+ * Panth XML Sitemap - System configuration.
  *
  * Tab `panth` is declared by Panth_Core. Section id matches the Config
  * helper paths (`panth_xml_sitemap/general/*`, `panth_xml_sitemap/generation/*`,

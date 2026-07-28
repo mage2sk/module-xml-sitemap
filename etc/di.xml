@@ -23,7 +23,7 @@
                 <item name="blog" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\BlogContributor</item>
                 <item name="video" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\VideoContributor</item>
                 <!--
-                  Optional integrations — the contributors below stay
+                  Optional integrations - the contributors below stay
                   silent (yield zero URLs) when their source module's
                   tables aren't installed. Safe to leave registered on
                   every site.

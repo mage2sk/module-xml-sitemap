@@ -37,7 +37,7 @@ class Rebuild
                         $this->builder->updateProfileStats($profileId, $stats);
 
                         $this->logger->info(sprintf(
-                            '[PanthXmlSitemap] Sitemap cron: profile "%s" (id %d) completed — %d URLs, %d files, %.2fs',
+                            '[PanthXmlSitemap] Sitemap cron: profile "%s" (id %d) completed - %d URLs, %d files, %.2fs',
                             $profileName,
                             $profileId,
                             $stats['url_count'],

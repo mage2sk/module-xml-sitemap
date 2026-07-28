@@ -10,7 +10,7 @@ namespace Panth\XmlSitemap\Api;
  * Defining this inside module-xml-sitemap (rather than depending
  * directly on Panth\Hreflang\Api\HreflangResolverInterface) keeps
  * setup:di:compile working on installs that don't ship the
- * mage2kishan/module-hreflang package — DI compile validates
+ * mage2kishan/module-hreflang package - DI compile validates
  * constructor types against autoloadable classes, and a hard
  * cross-module import would crash with "Class does not exist".
  *
