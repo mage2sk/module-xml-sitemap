@@ -4,6 +4,15 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.26] - Blog contributor rewrite
+
+### Fixed
+- The blog contributor emitted zero URLs for Mageplaza_Blog: post fields were probed with `method_exists()`, which fails on Mageplaza's magic-getter post model, so every post was silently skipped. Posts are now read through guarded raw table queries.
+
+### Changed
+- The contributor is self-contained (module-manager and table-existence guards, no compile-time references to other packages). Magefan URLs honour permalink type, custom routes, suffix and trailing-slash settings; Mageplaza URLs honour the configured route prefix and `.html` suffix; per-post `lastmod` is emitted from the post's update timestamp.
+- Legacy Mirasvit Blog (EAV-based `Mirasvit\Blog\Model\Post`) probing was dropped; it cannot run on the supported Magento/PHP range.
+
 ## [1.0.25]
 
 ### Changed
