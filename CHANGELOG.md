@@ -4,6 +4,11 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.27] - Blog URL config path fix
+
+### Fixed
+- Blog post URLs now resolve the URL prefix and suffix from both supported blog configuration layouts (newer blog releases moved these settings to a different config group), so post URLs include the configured suffix again instead of emitting suffix-less URLs that return 404.
+
 ## [1.0.26] - Blog contributor rewrite
 
 ### Fixed

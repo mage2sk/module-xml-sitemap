@@ -30,8 +30,8 @@ class BlogContributor implements ContributorInterface
 
     private const MAGEPLAZA_MODULE        = 'Mageplaza_Blog';
     private const MAGEPLAZA_POST_TABLE    = 'mageplaza_blog_post';
-    private const MAGEPLAZA_ROUTE_PATH    = 'blog/general/url_prefix';
-    private const MAGEPLAZA_SUFFIX_PATH   = 'blog/general/url_suffix';
+    private const MAGEPLAZA_ROUTE_PATHS   = ['blog/display/url_prefix', 'blog/general/url_prefix'];
+    private const MAGEPLAZA_SUFFIX_PATHS  = ['blog/display/url_suffix', 'blog/general/url_suffix'];
     private const MAGEPLAZA_DEFAULT_ROUTE = 'blog';
     private const MAGEPLAZA_POST_TYPE     = 'post';
 
@@ -189,9 +189,8 @@ class BlogContributor implements ContributorInterface
                 $select->where('FIND_IN_SET(0, store_ids) OR FIND_IN_SET(?, store_ids)', $storeId);
             }
 
-            $route = trim((string) ($this->scopeConfig->getValue(self::MAGEPLAZA_ROUTE_PATH, ScopeInterface::SCOPE_STORE, $storeId)
-                ?: self::MAGEPLAZA_DEFAULT_ROUTE), '/');
-            $suffixValue = trim((string) $this->scopeConfig->getValue(self::MAGEPLAZA_SUFFIX_PATH, ScopeInterface::SCOPE_STORE, $storeId));
+            $route = trim($this->firstConfigValue(self::MAGEPLAZA_ROUTE_PATHS, $storeId) ?: self::MAGEPLAZA_DEFAULT_ROUTE, '/');
+            $suffixValue = trim($this->firstConfigValue(self::MAGEPLAZA_SUFFIX_PATHS, $storeId));
             $suffix = $suffixValue !== '' ? '.' . ltrim($suffixValue, '.') : '';
 
             $stmt = $conn->query($select);
@@ -213,6 +212,17 @@ class BlogContributor implements ContributorInterface
         } catch (\Throwable $e) {
             $this->logger->info('[Panth_XmlSitemap] blog posts (Mageplaza) failed: ' . $e->getMessage());
         }
+    }
+
+    private function firstConfigValue(array $paths, int $storeId): string
+    {
+        foreach ($paths as $path) {
+            $value = (string) $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
+            if ($value !== '') {
+                return $value;
+            }
+        }
+        return '';
     }
 
     private function formatLastmod(string $raw): ?string
