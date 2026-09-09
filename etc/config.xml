@@ -24,6 +24,7 @@
                 <xsl_enabled>1</xsl_enabled>
                 <exclude_out_of_stock>1</exclude_out_of_stock>
                 <exclude_noindex>1</exclude_noindex>
+                <index_filename>sitemap.xml</index_filename>
             </generation>
             <hreflang>
                 <include_hreflang>1</include_hreflang>

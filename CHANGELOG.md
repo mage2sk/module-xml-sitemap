@@ -4,6 +4,17 @@ All notable changes to Panth_XmlSitemap will be documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0]
+
+### Added
+- **Panth blog URLs are now in the sitemap.** The blog contributor only understood Magefan and Mageplaza schemas, so a store running the sibling blog module got zero blog URLs: its posts are gated by `status = 'published'` rather than an active flag, and no branch read `panth_blog_*` at all. Posts, categories, tags, authors and the blog index are now contributed natively. Posts respect `status = 'published'`, categories and authors respect `is_active`, and tags have no active flag so all are included.
+- The blog route prefix is read from the blog module's own `route_frontname` setting, so a store that renamed its blog route gets correct URLs rather than a hardcoded `/blog`.
+- **Sitemap Index Filename** under Generation, default `sitemap.xml`. The index was hardcoded as `sitemap_index.xml`, so the conventional `/sitemap.xml` never served the real index and needed a rename step after every build. Any path segment in the value is stripped, so the file cannot escape the output directory.
+
+### Changed
+- **The generated index is now `sitemap.xml` by default**, not `sitemap_index.xml`. A build removes both known index names first, so the two never coexist and switching back and forth leaves no stale file. A site that submitted `/sitemap_index.xml` to a search console should either update that reference or set the new field back to `sitemap_index.xml`.
+- The blog branch is fully guarded: it reads the blog tables only through `ResourceConnection` with `isTableExists()`, references no blog PHP class, and adds no `require` or module sequence. On a store without the blog module it is a clean no-op and the Magefan and Mageplaza branches behave exactly as before.
+
 ## [1.0.27] - Blog URL config path fix
 
 ### Fixed

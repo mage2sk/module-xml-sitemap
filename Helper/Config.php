@@ -17,6 +17,7 @@ class Config extends AbstractHelper
     public const XML_SITEMAP_GZIP            = 'panth_xml_sitemap/generation/gzip';
     public const XML_SITEMAP_XSL_ENABLED     = 'panth_xml_sitemap/generation/xsl_enabled';
     public const XML_SITEMAP_EXCLUDE_OOS     = 'panth_xml_sitemap/generation/exclude_out_of_stock';
+    public const XML_SITEMAP_INDEX_FILENAME  = 'panth_xml_sitemap/generation/index_filename';
     public const XML_SITEMAP_EXCLUDE_NOINDEX = 'panth_xml_sitemap/generation/exclude_noindex';
 
     public const XML_SITEMAP_INCLUDE_HREFLANG = 'panth_xml_sitemap/hreflang/include_hreflang';
@@ -124,6 +125,13 @@ class Config extends AbstractHelper
     private function flag(string $path, ?int $storeId): bool
     {
         return $this->scopeConfigDirect->isSetFlag($path, ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    public function getSitemapIndexFilename(?int $storeId = null): string
+    {
+        $name = basename(trim((string) ($this->value(self::XML_SITEMAP_INDEX_FILENAME, $storeId) ?? '')));
+
+        return $name !== '' ? $name : 'sitemap.xml';
     }
 
     private function value(string $path, ?int $storeId): mixed

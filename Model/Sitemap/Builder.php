@@ -16,6 +16,8 @@ use Psr\Log\LoggerInterface;
 
 class Builder implements BuilderInterface
 {
+    private const KNOWN_INDEX_FILENAMES = ['sitemap.xml', 'sitemap_index.xml'];
+
     private const XSL_FILENAME = 'sitemap-style.xsl';
 
     private const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
@@ -68,13 +70,9 @@ class Builder implements BuilderInterface
                 }
             }
         }
-        $indexFile = rtrim($absDir, '/') . '/sitemap_index.xml';
-        if (file_exists($indexFile)) {
-            try {
-                unlink($indexFile);
-            } catch (\Throwable) {
-            }
-        }
+        $indexFilename = $this->config->getSitemapIndexFilename($storeId);
+        $indexFile = rtrim($absDir, '/') . '/' . $indexFilename;
+        $this->removeStaleIndex($absDir, $indexFilename);
 
         $xslEnabled = $this->config->isSitemapXslEnabled($storeId);
         $xslHref    = $xslEnabled ? self::XSL_FILENAME : null;
@@ -412,13 +410,9 @@ class Builder implements BuilderInterface
                 }
             }
         }
-        $indexFile = rtrim($absDir, '/') . '/sitemap_index.xml';
-        if (file_exists($indexFile)) {
-            try {
-                unlink($indexFile);
-            } catch (\Throwable) {
-            }
-        }
+        $indexFilename = $this->config->getSitemapIndexFilename($storeId);
+        $indexFile = rtrim($absDir, '/') . '/' . $indexFilename;
+        $this->removeStaleIndex($absDir, $indexFilename);
 
         $xslEnabled = $this->config->isSitemapXslEnabled($storeId);
         $xslHref    = $xslEnabled ? self::XSL_FILENAME : null;
@@ -961,6 +955,20 @@ class Builder implements BuilderInterface
             }
         } catch (\Throwable $e) {
             $this->logger->warning('[PanthSEO] Failed to write XSL stylesheet to: ' . $xslPath . ' - ' . $e->getMessage());
+        }
+    }
+
+    private function removeStaleIndex(string $absDir, string $indexFilename): void
+    {
+        foreach (array_unique(array_merge([$indexFilename], self::KNOWN_INDEX_FILENAMES)) as $name) {
+            $file = rtrim($absDir, '/') . '/' . $name;
+            if (!file_exists($file)) {
+                continue;
+            }
+            try {
+                unlink($file);
+            } catch (\Throwable) {
+            }
         }
     }
 }

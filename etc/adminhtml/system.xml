@@ -42,6 +42,11 @@
             <group id="generation" translate="label" sortOrder="20"
                    showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Generation</label>
+                <field id="index_filename" translate="label comment" type="text" sortOrder="60"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sitemap Index Filename</label>
+                    <comment>Filename of the generated sitemap index, written into the output directory. Default sitemap.xml. Use sitemap_index.xml to keep the name used before 1.1.0. Any path segment is stripped, so the file always lands in the output directory.</comment>
+                </field>
                 <field id="shard_size" translate="label comment" type="text" sortOrder="10"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>URLs per Shard</label>

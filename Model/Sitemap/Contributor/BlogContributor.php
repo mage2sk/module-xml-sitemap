@@ -35,6 +35,18 @@ class BlogContributor implements ContributorInterface
     private const MAGEPLAZA_DEFAULT_ROUTE = 'blog';
     private const MAGEPLAZA_POST_TYPE     = 'post';
 
+    private const PANTH_POST_TABLE      = 'panth_blog_post';
+    private const PANTH_CATEGORY_TABLE  = 'panth_blog_category';
+    private const PANTH_TAG_TABLE       = 'panth_blog_tag';
+    private const PANTH_AUTHOR_TABLE    = 'panth_blog_author';
+    private const PANTH_ROUTE_PATH      = 'panth_blog/general/route_frontname';
+    private const PANTH_DEFAULT_ROUTE   = 'blog';
+    private const PANTH_CHANGEFREQ_POST = 'weekly';
+    private const PANTH_CHANGEFREQ_TAX  = 'weekly';
+    private const PANTH_PRIORITY_POST   = 0.6;
+    private const PANTH_PRIORITY_TAX    = 0.4;
+    private const PANTH_PRIORITY_INDEX  = 0.7;
+
     public function __construct(
         private readonly ResourceConnection $resource,
         private readonly StoreManagerInterface $storeManager,
@@ -60,6 +72,11 @@ class BlogContributor implements ContributorInterface
 
         $store   = $this->storeManager->getStore($storeId);
         $baseUrl = rtrim((string) $store->getBaseUrl(), '/') . '/';
+
+        if ($conn->isTableExists($this->resource->getTableName(self::PANTH_POST_TABLE))) {
+            yield from $this->getPanthBlogUrls($conn, $storeId, rtrim($baseUrl, '/'), $config);
+            return;
+        }
 
         $changefreq = $config['changefreq'] ?? self::CHANGEFREQ;
         $priority   = isset($config['priority']) ? (float) $config['priority'] : self::PRIORITY;
@@ -232,5 +249,96 @@ class BlogContributor implements ContributorInterface
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    private function getPanthBlogUrls(
+        \Magento\Framework\DB\Adapter\AdapterInterface $conn,
+        int $storeId,
+        string $baseUrl,
+        array $config
+    ): \Generator {
+        $changefreqPost = $config['changefreq'] ?? self::PANTH_CHANGEFREQ_POST;
+        $priorityPost = isset($config['priority']) ? (float) $config['priority'] : self::PANTH_PRIORITY_POST;
+        $route = $this->getPanthRoute($storeId);
+
+        try {
+            $select = $conn->select()
+                ->from($this->resource->getTableName(self::PANTH_POST_TABLE), ['url_key', 'updated_at', 'published_at'])
+                ->where('status = ?', 'published');
+            foreach ($conn->fetchAll($select) as $row) {
+                $slug = trim((string) ($row['url_key'] ?? ''), '/');
+                if ($slug === '') {
+                    continue;
+                }
+                $lastmod = (string) ($row['updated_at'] ?? '');
+                if ($lastmod === '') {
+                    $lastmod = (string) ($row['published_at'] ?? '');
+                }
+                yield [
+                    'loc' => $baseUrl . '/' . $route . '/' . $slug,
+                    'lastmod' => $lastmod !== '' ? date('c', (int) strtotime($lastmod)) : '',
+                    'changefreq' => $changefreqPost,
+                    'priority' => $priorityPost,
+                ];
+            }
+        } catch (\Throwable $e) {
+            $this->logger->info('[Panth_XmlSitemap] blog posts (Panth) failed: ' . $e->getMessage());
+        }
+
+        yield from $this->yieldPanthTaxonomy($conn, self::PANTH_CATEGORY_TABLE, $baseUrl, $route . '/category/', true);
+        yield from $this->yieldPanthTaxonomy($conn, self::PANTH_TAG_TABLE, $baseUrl, $route . '/tag/', false);
+        yield from $this->yieldPanthTaxonomy($conn, self::PANTH_AUTHOR_TABLE, $baseUrl, $route . '/author/', true);
+
+        yield [
+            'loc' => $baseUrl . '/' . $route,
+            'changefreq' => self::PANTH_CHANGEFREQ_POST,
+            'priority' => self::PANTH_PRIORITY_INDEX,
+        ];
+    }
+
+    private function yieldPanthTaxonomy(
+        \Magento\Framework\DB\Adapter\AdapterInterface $conn,
+        string $tableAlias,
+        string $baseUrl,
+        string $pathPrefix,
+        bool $filterActive
+    ): \Generator {
+        $table = $this->resource->getTableName($tableAlias);
+        if (!$conn->isTableExists($table)) {
+            return;
+        }
+        try {
+            $select = $conn->select()->from($table, ['url_key', 'updated_at']);
+            if ($filterActive) {
+                $select->where('is_active = ?', 1);
+            }
+            foreach ($conn->fetchAll($select) as $row) {
+                $slug = trim((string) ($row['url_key'] ?? ''), '/');
+                if ($slug === '') {
+                    continue;
+                }
+                yield [
+                    'loc' => $baseUrl . '/' . $pathPrefix . $slug,
+                    'lastmod' => !empty($row['updated_at'])
+                        ? date('c', (int) strtotime((string) $row['updated_at']))
+                        : '',
+                    'changefreq' => self::PANTH_CHANGEFREQ_TAX,
+                    'priority' => self::PANTH_PRIORITY_TAX,
+                ];
+            }
+        } catch (\Throwable $e) {
+            $this->logger->info('[Panth_XmlSitemap] blog taxonomy ' . $tableAlias . ' failed: ' . $e->getMessage());
+        }
+    }
+
+    private function getPanthRoute(int $storeId): string
+    {
+        $route = trim((string) $this->scopeConfig->getValue(
+            self::PANTH_ROUTE_PATH,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        ), '/');
+
+        return $route !== '' ? $route : self::PANTH_DEFAULT_ROUTE;
     }
 }
