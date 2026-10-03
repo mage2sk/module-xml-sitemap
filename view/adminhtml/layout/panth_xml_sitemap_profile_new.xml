@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * "Add New Sitemap Profile" page. Reuses the edit-form handle so the form
+ * fields render with empty defaults driven by ProfileFormDataProvider.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="admin-1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="panth_xml_sitemap_profile_edit"/>
+</page>
