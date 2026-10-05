@@ -1,0 +1,116 @@
+<?php
+declare(strict_types=1);
+
+namespace Panth\XmlSitemap\Controller\Adminhtml\Profile;
+
+use Panth\XmlSitemap\Controller\Adminhtml\AbstractAction;
+use Panth\XmlSitemap\Model\Sitemap\Builder;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Backend\App\Action\Context;
+
+class Generate extends AbstractAction implements HttpPostActionInterface
+{
+    public const ADMIN_RESOURCE = 'Panth_XmlSitemap::profiles';
+
+    public function __construct(
+        Context $context,
+        private readonly Builder $builder
+    ) {
+        parent::__construct($context);
+    }
+
+    public function execute()
+    {
+        $resultRedirect = $this->resultRedirectFactory->create();
+        $profileId = (int) $this->getRequest()->getParam('id', 0);
+        if ($profileId === 0) {
+            $profileId = (int) $this->getRequest()->getParam('profile_id', 0);
+        }
+
+        try {
+            if ($profileId > 0) {
+                $profile = $this->builder->loadProfile($profileId);
+                if ($profile === null) {
+                    $this->messageManager->addErrorMessage(
+                        __('Sitemap profile with ID %1 was not found.', $profileId)
+                    );
+                    return $resultRedirect->setPath('*/*/');
+                }
+
+                $stats = $this->builder->buildFromProfile($profile);
+                $this->builder->updateProfileStats($profileId, $stats);
+
+                if (!empty($stats['disabled'])) {
+                    $this->messageManager->addWarningMessage($this->disabledMessage($profile));
+                    return $resultRedirect->setPath('*/*/');
+                }
+
+                $this->messageManager->addSuccessMessage(
+                    __(
+                        'Sitemap generated for profile "%1": %2 URLs in %3 files (%4 seconds).',
+                        $profile['name'] ?? 'unnamed',
+                        $stats['url_count'],
+                        $stats['file_count'],
+                        number_format($stats['generation_time'], 2)
+                    )
+                );
+            } else {
+                $profiles = $this->builder->loadActiveProfiles();
+                if (!empty($profiles)) {
+                    $totalUrls  = 0;
+                    $totalFiles = 0;
+                    $totalTime  = 0.0;
+                    $built      = 0;
+
+                    foreach ($profiles as $profile) {
+                        $stats = $this->builder->buildFromProfile($profile);
+                        $pid = (int) ($profile['profile_id'] ?? 0);
+                        if ($pid > 0) {
+                            $this->builder->updateProfileStats($pid, $stats);
+                        }
+                        if (!empty($stats['disabled'])) {
+                            $this->messageManager->addWarningMessage($this->disabledMessage($profile));
+                            continue;
+                        }
+                        $built++;
+                        $totalUrls  += $stats['url_count'];
+                        $totalFiles += $stats['file_count'];
+                        $totalTime  += $stats['generation_time'];
+                    }
+
+                    if ($built > 0) {
+                        $this->messageManager->addSuccessMessage(
+                            __(
+                                'Sitemap generated for %1 profile(s): %2 URLs in %3 files (%4 seconds total).',
+                                $built,
+                                $totalUrls,
+                                $totalFiles,
+                                number_format($totalTime, 2)
+                            )
+                        );
+                    }
+                } else {
+                    $this->messageManager->addSuccessMessage(
+                        __(
+                            'No active sitemap profiles found. Please create a profile first, or use "bin/magento panth:seo:sitemap:generate --store=<id>" for legacy generation.'
+                        )
+                    );
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->messageManager->addErrorMessage(__('Error generating sitemap: %1', $e->getMessage()));
+        }
+
+        return $resultRedirect->setPath('*/*/');
+    }
+
+    private function disabledMessage(array $profile): \Magento\Framework\Phrase
+    {
+        return __(
+            'The sitemap for profile "%1" was not generated because XML Sitemap is disabled for its store view '
+            . '(Stores > Configuration > Panth Infotech > XML Sitemap > General > Enabled). '
+            . 'Its sitemap files were removed.',
+            $profile['name'] ?? 'unnamed'
+        );
+    }
+}

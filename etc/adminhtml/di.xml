@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Product edit form: inject "Exclude from Sitemap" field -->
+    <type name="Magento\Catalog\Ui\DataProvider\Product\Form\ProductDataProvider">
+        <plugin name="panth_xml_sitemap_product_form"
+                type="Panth\XmlSitemap\Plugin\Admin\ProductFormSitemapPlugin"
+                sortOrder="35"/>
+    </type>
+
+    <!-- Category edit form: inject "Exclude from Sitemap" field -->
+    <type name="Magento\Catalog\Model\Category\DataProvider">
+        <plugin name="panth_xml_sitemap_category_form"
+                type="Panth\XmlSitemap\Plugin\Admin\CategoryFormSitemapPlugin"
+                sortOrder="35"/>
+    </type>
+
+</config>

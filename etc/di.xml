@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Interface bindings -->
+    <preference for="Panth\XmlSitemap\Api\BuilderInterface" type="Panth\XmlSitemap\Model\Sitemap\Builder"/>
+    <!-- The Builder consumes this. The default binding returns no alternates
+         unless "Use Panth Hreflang Module" is on and mage2kishan/module-hreflang
+         is installed, so DI compile keeps working without that package.
+         Consumers can declare their own <preference> overriding this with an
+         adapter that delegates to another hreflang resolver. -->
+    <preference for="Panth\XmlSitemap\Api\HreflangResolverInterface" type="Panth\XmlSitemap\Model\Hreflang\ModuleHreflangResolver"/>
+
+    <!-- Sitemap contributors (DI list). Builder iterates these in declared order.
+         Disable Product/Category contributors if enabling Image/Hreflang variants
+         to avoid duplicate <url> entries. -->
+    <type name="Panth\XmlSitemap\Model\Sitemap\Builder">
+        <arguments>
+            <argument name="contributors" xsi:type="array">
+                <item name="product" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\ProductContributor</item>
+                <item name="category" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\CategoryContributor</item>
+                <item name="cms_page" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\CmsPageContributor</item>
+                <item name="landing_page" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\LandingPageContributor</item>
+                <item name="blog" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\BlogContributor</item>
+                <item name="video" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\VideoContributor</item>
+                <!--
+                  Optional integrations - the contributors below stay
+                  silent (yield zero URLs) when their source module's
+                  tables aren't installed. Safe to leave registered on
+                  every site.
+                -->
+                <item name="testimonial" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\TestimonialContributor</item>
+                <item name="faq" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\FaqContributor</item>
+                <item name="dynamic_form" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\DynamicFormContributor</item>
+                <item name="additional_links" xsi:type="object">Panth\XmlSitemap\Model\Sitemap\Contributor\AdditionalLinksContributor</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Grid collection: real PHP class extending SearchResult -->
+    <type name="Panth\XmlSitemap\Model\ResourceModel\Profile\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">panth_seo_sitemap_profile</argument>
+            <argument name="resourceModel" xsi:type="string">Panth\XmlSitemap\Model\ResourceModel\Profile</argument>
+        </arguments>
+    </type>
+
+    <!-- Data Provider Configuration: register grid data source -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="panth_xml_sitemap_profile_listing_data_source" xsi:type="string">Panth\XmlSitemap\Model\ResourceModel\Profile\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Queue merger registration for the sitemap shard topic -->
+    <type name="Magento\Framework\MessageQueue\MergerFactory">
+        <arguments>
+            <argument name="mergers" xsi:type="array">
+                <item name="panth_xml_sitemap.sitemap_shard" xsi:type="string">Magento\Framework\MessageQueue\Merger</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Console commands -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="panth_xml_sitemap_generate" xsi:type="object">Panth\XmlSitemap\Console\Command\GenerateCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Panth\XmlSitemap\Ui\ProfileGridFulltextFilter" type="Panth\XmlSitemap\Ui\Component\Listing\LikeFulltextFilter">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="name" xsi:type="string">main_table.name</item>
+                <item name="output_path" xsi:type="string">main_table.output_path</item>
+                <item name="entity_types" xsi:type="string">main_table.entity_types</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Panth\XmlSitemap\Ui\ProfileGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Panth\XmlSitemap\Ui\ProfileGridFulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Panth\XmlSitemap\Ui\ProfileGridReporting" type="Magento\Framework\View\Element\UiComponent\DataProvider\Reporting">
+        <arguments>
+            <argument name="filterPool" xsi:type="object">Panth\XmlSitemap\Ui\ProfileGridFilterPool</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Panth\XmlSitemap\Ui\ProfileGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="reporting" xsi:type="object">Panth\XmlSitemap\Ui\ProfileGridReporting</argument>
+        </arguments>
+    </virtualType>
+</config>
