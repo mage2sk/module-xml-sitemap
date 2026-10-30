@@ -2,8 +2,8 @@
     "name": "mage2kishan/module-xml-sitemap",
     "description": "Panth XML Sitemap \u2014 sharded XML sitemap generator for Magento 2: per-store profile CRUD, product/category/CMS/landing-page/blog/video/image/additional-link contributors, hreflang tags, image + video tags, auto-split at 50,000 URLs or 50 MB, optional gzip compression, changefreq and priority, XSL stylesheet, delta tracking, async shard queue, per-profile cron schedules, CLI generator. Hyva and Luma compatible. Extracted from Panth_AdvancedSEO.",
     "type": "magento2-module",
-    "version": "1.2.8",
-    "license": "proprietary",
+    "version": "1.2.9",
+    "license": "MIT",
     "keywords": [
         "magento2",
         "magento2-module",
